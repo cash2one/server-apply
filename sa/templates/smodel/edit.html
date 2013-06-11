@@ -1,0 +1,9 @@
+{% extends "smodel/layout.html" %}
+
+{% block content_body %}
+
+{% from 'import/forms.html' import smodel_form %}
+
+{{ smodel_form(form, url_for('smodel.edit', smodel_id=smodel.id), '修改机器型号', '保存', url_for('smodel.index')) }}
+
+{% endblock %}

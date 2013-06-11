@@ -1,0 +1,32 @@
+{% extends "user/layout.html" %}
+
+{% block add_head %}
+<script src="{{ url_for('static',filename='js/page/user_index.js') }}"></script>
+{% endblock %}
+
+{% block content_body %}
+<table class="table table-hover table-bordered">
+  <thead>
+    <tr>
+      <td>用户名</td>
+      <td>中文名</td>
+      <td>邮箱</td>
+      <td>管理员</td>
+      <td>审批人</td>
+      <td>物理机采购</td>
+    </tr>
+  </thead>
+  <tbody>
+    {% for u in user %}
+    <tr>
+      <td>{{ u.username }}</td>
+      <td>{{ u.chinese_name }}</td>
+      <td>{{ u.email }}</td>
+      <td><input type="checkbox" {% if u.if_admin %}checked{% endif %} value="{{ u.username }}" data-role="admin"></td>
+      <td><input type="checkbox" {% if u.if_approver %}checked{% endif %} value="{{ u.username }}" data-role="approver"></td>
+      <td><input type="checkbox" {% if u.if_idc %}checked{% endif %} value="{{ u.username }}" data-role="idc"></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+<table>
+{% endblock %}

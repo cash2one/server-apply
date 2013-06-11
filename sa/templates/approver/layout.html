@@ -1,0 +1,6 @@
+{% extends "layout.html" %}
+
+{% block nav %}
+{% from 'import/nav.html' import nav %}
+{{ nav(current_user, 'approver') }}
+{% endblock %}

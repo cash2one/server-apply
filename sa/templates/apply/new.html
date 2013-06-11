@@ -1,0 +1,14 @@
+{% extends "apply/layout.html" %}
+
+{% block add_head %}
+<script src="{{ url_for('static',filename='js/page/apply_new.js') }}"></script>
+{% endblock %}
+
+
+{% block content_body %}
+
+{% from 'import/forms.html' import sapply_form %}
+
+{{ sapply_form(form, url_for('apply.new', smodel_id=addition.smodel_id), '申请机器', '确定', addition.referer) }}
+
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends "layout.html" %}
+
+{% block nav %}
+{% from 'import/nav.html' import nav %}
+{{ nav(current_user, '') }}
+{% endblock %}
+
+{% block content_body %}
+<h2>403 forbidden!</h2>
+{% endblock %}

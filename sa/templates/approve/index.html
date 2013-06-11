@@ -1,0 +1,90 @@
+{% extends "approve/layout.html" %}
+
+{% block content_body %}
+<div class="container">
+  <h4>审核列表</h4>
+</div><br/>
+
+<div class="accordion">
+  <div class="accordion-group">
+    <div class="accordion-heading">
+      <a class="accordion-toggle" data-toggle="collapse" href="#approving">待审核</a>
+    </div>
+    <div id="approving" class="accordion-body collapse in">
+      <div class="accordion-inner">
+        <table class="table table-hover clean">
+          <thead>
+            <tr>
+              <td>简述</td>
+              <td>型号</td>
+              <td>数量</td>
+              <td>申请时间</td>
+              <td width="10%">操作</td>
+            </tr>
+          </thead>
+          <tbody>
+            {% for ai in appling %}
+            <tr>
+              <td>{{ ai.name }}</td>
+              <td>
+              {% if smodel[ai.s_id]: %}
+                {{smodel[ai.s_id].stype_name }} -- {{ smodel[ai.s_id].name }}
+              {% else: %}
+                NULL -- NULL
+              {% endif %}
+              </td>
+              <td>{{ ai.s_num }}</td>
+              <td>{{ ai.apply_date }}</td>
+              <td>
+                <a title="驳回" href="{{ url_for('approve.deny', apply_id=ai.id) }}"><i class="icon-remove"></i></a>
+                <a title="通过" href="{{ url_for('approve.ratify', apply_id=ai.id) }}"><i class="icon-ok"></i></a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div><!--End approving-->
+  <br/>
+  <div class="accordion-group">
+    <div class="accordion-heading">
+      <a class="accordion-toggle" data-toggle="collapse" href="#sProduction">历史</a>
+    </div>
+    <div id="sProduction" class="accordion-body collapse in">
+      <div class="accordion-inner">
+        <table class="table table-hover clean">
+          <thead>
+            <tr>
+              <td>简述</td>
+              <td>型号</td>
+              <td>数量</td>
+              <td>申请时间</td>
+              <td width="10%">状态</td>
+            </tr>
+          </thead>
+          <tbody>
+            {% for ad in applied %}
+            <tr>
+              <td>{{ ad.name }}</td>
+              <td>
+              {% if smodel[ad.s_id]: %}
+                {{smodel[ad.s_id].stype_name }} -- {{ smodel[ad.s_id].name }}
+              {% else: %}
+                NULL -- NULL
+              {% endif %}
+              </td>
+              <td>{{ ad.s_num }}</td>
+              <td>{{ ad.apply_date }}</td>
+              <td>
+                <span class="label {{ config['APPLY_STATUS'][ad.status]['class'] }}">{{ config['APPLY_STATUS'][ad.status]['name'] }}</span>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div><!--End sProduction-->
+</div>
+{% endblock %}

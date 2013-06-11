@@ -1,0 +1,30 @@
+{% extends "approver/layout.html" %}
+
+{% block content_body %}
+<div class="container">
+  <a href="{{ url_for('approver.add') }}" role="button" class="btn btn-primary pull-right">添加</a>
+  <h4>审批流程</h4>
+</div><br/>
+
+<table class="table table-hover">
+  <thead>
+    <tr>
+      <td width="20%">名称</td>
+      <td>审批流程</td>
+      <td width="10%">操作</td>
+    </tr>
+  </thead>
+  <tbody>
+    {% for a in approver %}
+    <tr>
+      <td>{{ a.name }}</td>
+      <td>{{ a.value }}</td>
+      <td>
+        <a href="{{ url_for('approver.edit', approver_id=a.id) }}"><i class="icon-edit"></i></a>
+        <a href="{{ url_for('approver.delete', approver_id=a.id) }}"><i class="icon-remove"></i></a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

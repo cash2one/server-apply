@@ -1,0 +1,15 @@
+{% from 'import/forms.html' import field_show %}
+{% extends "stype/layout.html" %}
+
+{% block content_body %}
+<form class="form-horizontal form" action="{{ url_for('stype.delete', stype_id=stype.id) }}" method="post">
+    <legend>删除栏目</legend>
+
+    {{ field_show(form, 'name') }}
+
+    <div class="form-actions">
+        <input class="btn btn-danger" type="submit" value="删除"/>
+        <a class="btn" href="{{ url_for('smodel.index') }}">取消</a>
+    </div>
+</form>
+{% endblock %}

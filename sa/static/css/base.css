@@ -1,0 +1,35 @@
+body {
+    padding-top: 60px;
+}
+
+.clean {
+    background: none;
+    margin: 0;
+    padding: 0;
+    border: none;
+    line-height: 1.5em;
+}
+
+.padding-t5 {
+    padding-top: 5px;
+}
+
+.rows10 {
+    height: 10em;
+}
+
+.rows15 {
+    height: 15em;
+}
+
+.container thead {
+    background-color: #EEE;
+}
+
+.accordion-heading {
+    background-color: #EEE;
+}
+
+.accordion-body thead {
+    background-color: #FFF;
+}

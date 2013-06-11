@@ -1,0 +1,9 @@
+{% extends "stype/layout.html" %}
+
+{% block content_body %}
+
+{% from 'import/forms.html' import stype_form %}
+
+{{ stype_form(form, url_for('stype.edit', stype_id=stype.id), '编辑栏目', '保存', url_for('smodel.index')) }}
+
+{% endblock %}

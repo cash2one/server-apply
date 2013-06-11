@@ -1,0 +1,28 @@
+{% macro nav(current_user, view) %}
+<div class="navbar navbar-inverse navbar-fixed-top">
+  <div class="navbar-inner">
+    <div class="container">
+
+      <a class="brand" href="#">服务器申请系统</a>
+      <div class="nav-collapse collapse">
+        <ul class="nav">
+          <li{% if view=='apply' %} class="active"{% endif %}><a href="{{ url_for('apply.index') }}">申请</a></li>
+          <li{% if view=='approve' %} class="active"{% endif %}><a href="{{ url_for('approve.index') }}">审批</a></li>
+          <li{% if view=='smodel' %} class="active"{% endif %}><a href="{{ url_for('smodel.index') }}">服务器型号</a></li>
+          <li{% if view=='approver' %} class="active"{% endif %}><a href="{{ url_for('approver.index') }}">审批流程</a></li>
+          <li{% if view=='user' %} class="active"{% endif %}><a href="{{ url_for('user.index') }}">用户</a></li>
+        </ul>
+        <ul class="nav pull-right">
+          {% if current_user and current_user.is_authenticated() %}
+          <li><a href="#">你好，{{ current_user.chinese_name }}！</a></li>
+          <li><a href="{{ url_for('logout') }}">注销</a></li>
+          {% else %}
+          <li><a href="{{ url_for('login') }}">登录</a></li>
+          {% endif %}
+        </ul>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endmacro %}

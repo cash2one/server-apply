@@ -1,0 +1,9 @@
+{% extends "approver/layout.html" %}
+
+{% block content_body %}
+
+{% from 'import/forms.html' import approver_form %}
+
+{{ approver_form(form, url_for('approver.add'), '添加审核流程', '添加', url_for('approver.index')) }}
+
+{% endblock %}

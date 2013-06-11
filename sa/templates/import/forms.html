@@ -1,0 +1,121 @@
+{% macro error(msg, class='') %}
+    {% if msg %}
+    <span class="{{ class }} label label-important">
+        {{ msg[0] }}
+    </span>
+    {% endif %}
+{% endmacro %}
+
+
+{% macro field(form, name, class='', group_class='') %}
+<div class="control-group {{ group_class }}">
+    {{ form[name].label(class="control-label") }}
+    <div class="controls">
+        {{ form[name](class=class) }}
+        {{ error(form.errors[name]) }}
+    </div>
+</div> 
+{% endmacro %}
+
+
+{% macro field_show(form, name, data='') %}
+<div class="control-group">
+    {{ form[name].label(class="control-label") }}
+    <div class="controls padding-t5">
+    {% if data=='' %}
+        {{ form[name].data }}
+    {% else %}
+        {{ data }}
+    {% endif %}
+    </div>
+</div> 
+{% endmacro %}
+
+
+{% macro stype_form(form, url, legend, submit, return_url) %}
+<form class="form-horizontal" action="{{ url }}" method="post">
+
+    {{ form.hidden_tag() }}
+    {{ form.csrf }}
+
+    <legend>{{ legend }}</legend>
+
+    {{ field(form, 'name') }}
+    {{ field(form, 'if_t') }}
+
+    <div class="form-actions">
+        <input class="btn btn-primary" type="submit" value="{{ submit }}"/>
+        <a class="btn" href="{{ return_url }}">取消</a>
+    </div>
+
+</form>
+{% endmacro %}
+
+
+{% macro smodel_form(form, url, legend, submit, return_url) %}
+<form class="form-horizontal" action="{{ url }}" method="post">
+
+    {{ form.hidden_tag() }}
+    {{ form.csrf }}
+
+    <legend>{{ legend }}</legend>
+
+    {{ field(form, 'name') }}
+    {{ field(form, 'stype_id') }}
+    {{ field(form, 'if_v') }}
+    {{ field(form, 'cpucores') }}
+    {{ field(form, 'memsize') }}
+    {{ field(form, 'disk') }}
+    {{ field(form, 'approver_id') }}
+    {{ field(form, 'template', 'span6 rows15') }}
+
+    <div class="form-actions">
+        <input class="btn btn-primary" type="submit" value="{{ submit }}"/>
+        <a class="btn" href="{{ return_url }}">取消</a>
+    </div>
+    
+</form>
+{% endmacro %}
+
+
+{% macro sapply_form(form, url, legend, submit, return_url) %}
+<form class="form-horizontal" action="{{ url }}" method="post">
+
+    {{ form.hidden_tag() }}
+    {{ form.csrf }}
+
+    <legend>{{ legend }}</legend>
+
+    {{ field(form, 'name') }}
+    {{ field(form, 's_id') }}
+    {{ field(form, 's_num') }}
+    {{ field(form, 'days', '', 'hide days') }}
+    {{ field(form, 'desc', 'span6 rows15') }}
+
+    <div class="form-actions">
+        <input class="btn btn-primary" type="submit" value="{{ submit }}"/>
+        <a class="btn" href="{{ return_url }}">取消</a>
+    </div>
+    
+</form>
+{% endmacro %}
+
+
+{% macro approver_form(form, url, legend, submit, return_url) %}
+<form class="form-horizontal" action="{{ url }}" method="post">
+
+    {{ form.hidden_tag() }}
+    {{ form.csrf }}
+
+    <legend>{{ legend }}</legend>
+
+    {{ field(form, 'name') }}
+    {{ field(form, 'value', 'span5') }}
+
+    <div class="form-actions">
+        <input class="btn btn-primary" type="submit" value="{{ submit }}"/>
+        <a class="btn" href="{{ return_url }}">取消</a>
+    </div>
+    
+</form>
+{% endmacro %}

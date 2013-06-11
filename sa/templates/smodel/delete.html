@@ -1,0 +1,21 @@
+{% from 'import/forms.html' import field_show %}
+{% extends "smodel/layout.html" %}
+
+{% block content_body %}
+<form class="form-horizontal form" action="{{ url_for('smodel.delete', smodel_id=smodel.id) }}" method="post">
+    <legend>删除型号</legend>
+
+    {{ field_show(form, 'name') }}
+    {{ field_show(form, 'stype_id', stype.name) }}
+    {{ field_show(form, 'cpucores') }}
+    {{ field_show(form, 'memsize') }}
+    {{ field_show(form, 'disk') }}
+    {{ field_show(form, 'if_v', '虚拟机' if form['if_v'].data=='1' else '物理机') }}
+    {{ field_show(form, 'template', '<pre class="span6 clean">'|safe + form['template'].data + '</pre>'|safe) }}
+
+    <div class="form-actions">
+        <input class="btn btn-danger" type="submit" value="删除"/>
+        <a class="btn" href="{{ url_for('smodel.index') }}">取消</a>
+    </div>
+</form>
+{% endblock %}

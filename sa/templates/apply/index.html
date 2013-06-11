@@ -1,0 +1,161 @@
+{% extends "apply/layout.html" %}
+
+{% block add_head %}
+<script src="{{ url_for('static',filename='js/page/apply_index.js') }}"></script>
+{% endblock %}
+
+{% block content_body %}
+<div class="container">
+  <a href="{{ url_for('apply.new', smodel_id=0) }}" role="button" class="btn btn-primary pull-right">申请机器</a>
+  <h4>申请列表</h4>
+</div><br/>
+
+<div class="accordion">
+  <div class="accordion-group">
+    <div class="accordion-heading">
+      <a class="accordion-toggle" data-toggle="collapse" href="#approving">申请中</a>
+    </div>
+    <div id="approving" class="accordion-body collapse in">
+      <div class="accordion-inner">
+        <table class="table table-hover clean">
+          <thead>
+            <tr>
+              <td>简述</td>
+              <td>型号</td>
+              <td>数量</td>
+              <td>状态</td>
+              <td>申请时间</td>
+              <td>详情</td>
+              <td width="10%">操作</td>
+            </tr>
+          </thead>
+          <tbody>
+            {% for a in apply %}
+            {% if a.status in (1, 3, 6, 7) %}
+            <tr>
+              <td>{{ a.name }}</td>
+              <td>
+              {% if smodel[a.s_id]: %}
+                {{smodel[a.s_id].stype_name }} -- {{ smodel[a.s_id].name }}
+              {% else: %}
+                NULL -- NULL
+              {% endif %}
+              </td>
+              <td>{{ a.s_num }}</td>
+              <td><span class="label {{ config['APPLY_STATUS'][a.status]['class'] }}">{{ config['APPLY_STATUS'][a.status]['name'] }}</span></td>
+              <td>{{ a.apply_date }}</td>
+              <td class="detail">
+                <a href="#" data-ele-id="a{{ a.id }}" data-action="toggle"><i class="icon-chevron-down"></i></a>
+                <a href="#" data-ele-id="a{{ a.id }}" data-action="refresh"><i class="icon-refresh"></i></a>
+              </td>
+              <td>
+                <a href="{{ url_for('apply.cancle', apply_id=a.id) }}"><i class="icon-remove"></i></a>
+                <a href="{{ url_for('apply.ack', apply_id=a.id) }}"><i class="icon-ok"></i></a>
+              </td>
+            </tr>
+            {% if server.has_key(a.id) %}
+            {% for s in server[a.id] %}
+            <tr id="s{{ s.id }}" data-sid="{{ s.id }}" class="getinfo warning a{{ a.id }}">
+              <td colspan="1">loading...</td>
+              <td colspan="4"></td>
+              <td colspan="2"></td>
+            </tr>
+            {% endfor %}
+            {% endif %}
+            {% endif %}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div><!--End approving-->
+  <br/>
+  <div class="accordion-group">
+    <div class="accordion-heading">
+      <a class="accordion-toggle" data-toggle="collapse" href="#sTest">测试机</a>
+    </div>
+    <div id="sTest" class="accordion-body collapse in">
+      <div class="accordion-inner">
+        <table class="table table-hover clean">
+          <thead>
+            <tr>
+              <td>主机名</td>
+              <td>IP</td>
+              <td>状态</td>
+              <td>剩余天数</td>
+              <td width="10%">操作</td>
+            </tr>
+          </thead>
+          <tbody>
+            {% for st in server_t %}
+            <tr class="tinfo" data-sid="{{ st.id }}">
+              <td>loading...</td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td>
+                <a href="#"><i class="icon-remove"></i></a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div><!--End sTest-->
+  <br/>
+  <div class="accordion-group">
+    <div class="accordion-heading">
+      <a class="accordion-toggle" data-toggle="collapse" href="#sProduction">历史</a>
+    </div>
+    <div id="sProduction" class="accordion-body collapse in">
+      <div class="accordion-inner">
+        <table class="table table-hover clean">
+          <thead>
+            <tr>
+              <td>简述</td>
+              <td>型号</td>
+              <td>数量</td>
+              <td>状态</td>
+              <td>申请时间</td>
+              <td width="10%">详情</td>
+            </tr>
+          </thead>
+          <tbody>
+            {% for a in apply %}
+            {% if a.status in (2, 4, 5) %}
+            <tr>
+              <td>{{ a.name }}</td>
+              <td>
+              {% if smodel[a.s_id]: %}
+                {{smodel[a.s_id].stype_name }} -- {{ smodel[a.s_id].name }}
+              {% else: %}
+                NULL -- NULL
+              {% endif %}
+              </td>
+              <td>{{ a.s_num }}</td>
+              <td><span class="label {{ config['APPLY_STATUS'][a.status]['class'] }}">{{ config['APPLY_STATUS'][a.status]['name'] }}</span></td>
+              <td>{{ a.apply_date }}</td>
+              <td class="detail">
+                <a href="#" data-ele-id="a{{ a.id }}" data-action="toggle"><i class="icon-chevron-down"></i></a>
+                <a href="#" data-ele-id="a{{ a.id }}" data-action="refresh"><i class="icon-refresh"></i></a>
+              </td>
+            </tr>
+            {% if server.has_key(a.id) %}
+            {% for s in server[a.id] %}
+            <tr id="s{{ s.id }}" data-sid="{{ s.id }}" class="hide warning a{{ a.id }}">
+              <td colspan="1">loading...</td>
+              <td colspan="4"></td>
+              <td colspan="2"></td>
+            </tr>
+            {% endfor %}
+            {% endif %}
+            {% endif %}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div><!--End sProduction-->
+</div>
+{% endblock %}
