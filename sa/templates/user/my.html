@@ -1,0 +1,13 @@
+{% extends "user/layout.html" %}
+
+{% block add_head %}
+<script src="{{ url_for('static',filename='js/page/user_my.js') }}"></script>
+{% endblock %}
+
+{% block content_body %}
+
+{% from 'import/forms.html' import user_form %}
+
+{{ user_form(form, url_for('user.my'), '我的个人信息', '保存', addition.referer) }}
+
+{% endblock %}

@@ -3,18 +3,28 @@
   <div class="navbar-inner">
     <div class="container">
 
-      <a class="brand" href="#">服务器申请系统</a>
+      <a class="brand" href="/">服务器申请系统</a>
       <div class="nav-collapse collapse">
         <ul class="nav">
           <li{% if view=='apply' %} class="active"{% endif %}><a href="{{ url_for('apply.index') }}">申请</a></li>
+          {% if current_user.if_approver %}
           <li{% if view=='approve' %} class="active"{% endif %}><a href="{{ url_for('approve.index') }}">审批</a></li>
+          {% endif %}
+          <li{% if view=='server' %} class="active"{% endif %}><a href="{{ url_for('server.my') }}">我的机器</a></li>
           <li{% if view=='smodel' %} class="active"{% endif %}><a href="{{ url_for('smodel.index') }}">服务器型号</a></li>
+          {% if current_user.if_admin %}
           <li{% if view=='approver' %} class="active"{% endif %}><a href="{{ url_for('approver.index') }}">审批流程</a></li>
+          {% endif %}
+          {% if current_user.if_admin %}
           <li{% if view=='user' %} class="active"{% endif %}><a href="{{ url_for('user.index') }}">用户</a></li>
+          {% endif %}
+          {% if current_user.if_idc %}
+          <li{% if view=='idc' %} class="active"{% endif %}><a href="{{ url_for('idc.index') }}">物理机需求</a></li>
+          {% endif %}
         </ul>
         <ul class="nav pull-right">
           {% if current_user and current_user.is_authenticated() %}
-          <li><a href="#">你好，{{ current_user.chinese_name }}！</a></li>
+          <li><a href="{{ url_for('user.my') }}">你好，{{ current_user.chinese_name }}！</a></li>
           <li><a href="{{ url_for('logout') }}">注销</a></li>
           {% else %}
           <li><a href="{{ url_for('login') }}">登录</a></li>

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from flask import Blueprint, flash, url_for, render_template, redirect, request
-from flask.ext.login import current_user
+from flask.ext.login import current_user, login_required
 from flask.ext.wtf import Form, TextField, TextAreaField, SelectField, required, length, regexp
 from sqlalchemy import desc, or_, and_
 from time import localtime, strftime
@@ -10,8 +10,8 @@ import urllib2
 
 from sa import app
 from sa import db
-from sa.getter import get_smodel_by_id, get_server_by_apply_id, check_vm_apply, create_vm
-from sa.models import Stype, Smodel, Sapply, Server
+from sa.getter import *
+from sa.models import Stype, Smodel, Sapply, Server, Comment, ZeusItem
 from sa.views import *
 
 mod = Blueprint('apply', __name__,  url_prefix='/apply')
@@ -28,15 +28,16 @@ def gen_smodel():
 
 
 @mod.route('/')
+@login_required
 def index():
-    smodel = get_smodel_by_id()
-    server = get_server_by_apply_id()
-    server_t = Server.query.filter(and_(Server.applier==current_user.id, Server.if_t==1))
+    smodel_arr = get_smodel_by_id()
+    server_arr = get_server_by_apply_id()
     apply = Sapply.query.filter_by(applier=current_user.id).order_by(desc(Sapply.id))
-    return render_template('apply/index.html', apply=apply, smodel=smodel, server=server, server_t=server_t, config=app.config)
+    return render_template('apply/index.html', apply=apply, smodel=smodel_arr, server=server_arr, config=app.config)
 
 
 @mod.route('/new/smodel/<int:smodel_id>', methods=['GET','POST'])
+@login_required
 def new(smodel_id, **kvargs):
     form = SapplyForm()
     form.s_id.choices = gen_smodel()
@@ -47,10 +48,7 @@ def new(smodel_id, **kvargs):
 
     addition = {}
     addition['smodel_id'] = smodel_id
-    if request.headers.get('Referer') != None:
-        addition['referer'] = request.headers.get('Referer')
-    else:
-        addition['referer'] = url_for('.index')
+    addition['referer'] = request.headers.get('Referer') if(request.headers.get('Referer')!=None) else url_for('.index')
 
     if not form.validate_on_submit():
         return render_template('apply/new.html', form=form, addition=addition)
@@ -63,28 +61,160 @@ def new(smodel_id, **kvargs):
 
     try:
         sapply = Sapply(form.name.data, form.s_id.data, form.s_num.data, 1,
-                        form.desc.data, current_user.id, smodel[form.s_id.data].approver_value,
-                        strftime("%Y-%m-%d %H:%M", localtime()), form.days.data)
+                        current_user.id, smodel[form.s_id.data].approver_value,
+                        strftime("%Y-%m-%d %H:%M:%S", localtime()), form.days.data)
         db.session.add(sapply)
         db.session.commit()
     except:
         flash(u'申请失败', 'error')
         return render_template('apply/new.html', form=form, addition=addition)
 
-    if check_vm_apply(sapply.id):
-        if create_vm(sapply.id, sapply.days):
-            sapply.status = 6
-        else:
-            sapply.status = 7
-
-        db.session.add(sapply)
+    if form.desc.data != "":
+        comment = Comment(sapply.id, form.desc.data.replace('\n', '<br/>\n').replace('<', "&lt;").replace('>', "&gt;"),
+                          strftime("%Y-%m-%d %H:%M:%S", localtime()), current_user.username)
+        db.session.add(comment)
         db.session.commit()
 
-    flash(u'申请提交成功，请等待审核!', 'info')
+    if smodel[form.s_id.data].if_v:
+        if check_apply_status(sapply.id):
+            if create_vm(sapply.id, sapply.days):
+                sapply.status = 6
+            else:
+                sapply.status = 7
+
+            db.session.add(sapply)
+            db.session.commit()
+
+            return redirect(url_for('.index'))
+
+    flash(u'申请提交成功!', 'info')
     return redirect(url_for('.index'))
 
 
+@mod.route('/<int:apply_id>')
+@login_required
+@check_load_apply
+def detail(apply, **kvargs):
+    smodel_dict = get_smodel_by_id()
+    user_dict = get_user_by_username()
+    server = Server.query.filter(Server.apply_id==apply.id).all()
+    comment = Comment.query.filter(Comment.apply_id==apply.id).all()
+    flow_arr = []
+
+    for i in apply.approver.split('->'):
+      if i!='':
+        tmp = {}
+        tmp['username'] = i.split(':')[0]
+        try:
+            tmp['status'] = i.split(':')[1]
+        except:
+            tmp['status'] = u'undefined'
+        flow_arr.append(tmp)
+
+    deny_flag = False
+    undefined_flag = False
+    flow_arr_show = []
+
+    for f in flow_arr:
+        tmp = {}
+        tmp['username'] = f['username']
+
+        if deny_flag:
+            tmp['status'] = u"空"
+            tmp['class'] = ""
+
+        if undefined_flag:
+            tmp['status'] = u"待审核"
+            tmp['class'] = "label-info"
+
+        if f['status']=="ok":
+            tmp['status'] = u"已批准"
+            tmp['class'] = "label-success"
+
+        if f['status']=="deny":
+            deny_flag = True
+            tmp['status'] = u"驳回"
+            tmp['class'] = "label-important"
+
+        if f['status']=="undefined" and not deny_flag and not undefined_flag:
+            undefined_flag = True
+            tmp['status'] = u"审核中"
+            tmp['class'] = "label-info"
+
+        flow_arr_show.append(tmp)
+
+    return render_template('apply/detail.html', apply=apply, smodel_dict=smodel_dict, user_dict=user_dict,
+                            flow_arr=flow_arr_show, server=server, comment=comment, config=app.config)
+
+
+@mod.route('/<int:apply_id>/comment', methods=['GET','POST'])
+@login_required
+@check_load_apply
+def comment(apply, **kvargs):
+    if request.method != 'POST' or request.form['msg']=="":
+        return redirect(url_for('.detail', apply_id=apply.id))
+
+    comment = Comment(apply.id, request.form['msg'].replace('\n', '<br/>\n').replace('<', "&lt;").replace('>', "&gt;"),
+                      strftime("%Y-%m-%d %H:%M:%S", localtime()), current_user.username)
+    db.session.add(comment)
+    db.session.commit()
+
+    return redirect(url_for('.detail', apply_id=apply.id))
+
+
+@mod.route('/<int:apply_id>/recreate_server')
+@login_required
+@check_load_apply
+def recreate_server(apply, **kvargs):
+    if create_vm(apply.id, apply.days):
+        apply.status = 6
+        flash(u'创建成功', 'success')
+    else:
+        apply.status = 7
+        flash(u'创建失败', 'error')
+    db.session.add(apply)
+    db.session.commit()
+
+    return redirect(url_for('.detail', apply_id=apply.id))
+    
+
+
+@mod.route('/<int:apply_id>/attach_server', methods=['POST'])
+@login_required
+@check_load_apply
+def attach_server(apply, **kvargs):
+    zeusitem = ZeusItem.query.filter(ZeusItem.label==request.form['hostname'])
+    if zeusitem.count()!=1:
+        flash(u'没有找到该资产信息', 'error')
+    else:
+        server = Server(apply.id, zeusitem[0].id, None, 0, -1, strftime("%Y-%m-%d %H:%M:%S", localtime()), apply.applier)
+        db.session.add(server)
+        db.session.commit()
+    return redirect(url_for('.detail', apply_id=apply.id))
+
+
+@mod.route('/<int:apply_id>/detach_server/<int:server_id>', methods=['GET'])
+@login_required
+@check_load_apply
+@check_load_server
+def detach_server(apply, server, **kvargs):
+    db.session.delete(server)
+    db.session.commit()
+    return redirect(url_for('.detail', apply_id=apply.id))
+
+
+@mod.route('/<int:apply_id>/server_ready')
+@login_required
+@check_load_apply
+def server_ready(apply, **kvargs):
+    apply.status = 6
+    db.session.add(apply)
+    db.session.commit()
+    return redirect(url_for('.detail', apply_id=apply.id))
+
+
 @mod.route('/<int:apply_id>/ack')
+@login_required
 @check_load_apply
 def ack(apply, **kvargs):
     apply.status = 4
@@ -92,27 +222,43 @@ def ack(apply, **kvargs):
     db.session.add(apply)
     db.session.commit()
 
-    return redirect(url_for('.index'))
+    return redirect(url_for('.detail', apply_id=apply.id))
 
 
 @mod.route('/<int:apply_id>/cancle')
+@login_required
 @check_load_apply
 def cancle(apply, **kvargs):
     apply.status = 5
 
-    server = Server.query.filter(Server.apply_id == apply.id)
-
-    for s in server:
-        if s.vm_id != None:
-            req = urllib2.Request("%s/%d" % (app.config['APC_URL'], s.vm_id))
-            req.add_header('Authorization', app.config['APC_AUTH'])
-            req.get_method = lambda: 'DELETE'
-            urllib2.urlopen(req)
+    for s in Server.query.filter(Server.apply_id == apply.id):
+        if s.vm_id == None: continue
+        delete_vm(s.vm_id)
+        delete_zeus_item(s.zeus_id)
+    Server.query.filter(Server.apply_id == apply.id).delete()
 
     db.session.add(apply)
     db.session.commit()
 
-    return redirect(url_for('.index'))
+    return redirect(url_for('.detail', apply_id=apply.id))
+
+
+@mod.route('/<int:apply_id>/delete')
+@login_required
+@check_load_apply
+def delete(apply, **kvargs):
+    for s in Server.query.filter(Server.apply_id == apply.id):
+        if s.vm_id == None: continue
+        delete_vm(s.vm_id)
+        delete_zeus_item(s.zeus_id)
+
+    Server.query.filter(Server.apply_id==apply.id).delete()
+    Comment.query.filter(Comment.apply_id==apply.id).delete()
+
+    db.session.delete(apply)
+    db.session.commit()
+
+    return redirect(url_for('index'))
 
 
 class SapplyForm(Form):
@@ -120,5 +266,5 @@ class SapplyForm(Form):
     s_id = SelectField(u'机器型号', coerce=int, validators=[required()])
     s_num = TextField(u'数量', validators=[required(), regexp(u'^[0-9]+$'), length(max=11)])
     status = TextField(u'状态', validators=[])
-    desc = TextAreaField(u'描述', validators=[])
     days = TextField(u'天数', validators=[regexp(u'^[0-9]*$')])
+    desc = TextAreaField(u'描述', validators=[])

@@ -119,3 +119,25 @@
     
 </form>
 {% endmacro %}
+
+
+{% macro user_form(form, url, legend, submit, return_url) %}
+<form class="form-horizontal" action="{{ url }}" method="post">
+
+    {{ form.hidden_tag() }}
+    {{ form.csrf }}
+
+    <legend>{{ legend }}</legend>
+
+    {{ field(form, 'username', 'disabled') }}
+    {{ field(form, 'chinese_name', 'disabled') }}
+    {{ field(form, 'email') }}
+    {{ field(form, 'ssh_pubkey', 'span6 rows15') }}
+
+    <div class="form-actions">
+        <input class="btn btn-primary" type="submit" value="{{ submit }}"/>
+        <a class="btn" href="{{ return_url }}">取消</a>
+    </div>
+    
+</form>
+{% endmacro %}

@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
 from flask import Blueprint, render_template, redirect, url_for
-from flask.ext.login import current_user
-from sqlalchemy import or_, and_
+from flask.ext.login import current_user, login_required
+from sqlalchemy import or_, and_, desc
 
 from sa import app
 from sa import db
-from sa.getter import get_smodel_by_id, check_vm_apply, create_vm
+from sa.getter import *
 from sa.models import Sapply
 from sa.views import *
 
@@ -14,42 +14,46 @@ mod = Blueprint('approve', __name__,  url_prefix='/approve')
 
 
 @mod.route('/')
+@login_required
+@check_approver
 def index():
-    appling = Sapply.query.filter(and_(or_(Sapply.approver == current_user.id,
+    user_dict = get_user_by_username()
+    appling = Sapply.query.filter(and_(or_(Sapply.approver==current_user.id,
                                            Sapply.approver.like(current_user.id +"->%"),
                                            Sapply.approver.like("%:ok"+ current_user.id),
                                            Sapply.approver.like("%:ok"+ current_user.id +"->%")),
-                                       Sapply.status != 0,
-                                       Sapply.status != -1)).all()
+                                       Sapply.status==1)).order_by(desc(Sapply.id)).all()
 
-    applied = Sapply.query.filter(Sapply.approver.like("%"+ current_user.id +":%")).all()
+    applied = Sapply.query.filter(Sapply.approver.like("%"+ current_user.id +":%")).order_by(desc(Sapply.id)).all()
 
     smodel = get_smodel_by_id()
-    return render_template('approve/index.html', appling=appling, applied=applied, smodel=smodel, config=app.config)
+    return render_template('approve/index.html', appling=appling, applied=applied, smodel=smodel, user_dict=user_dict, config=app.config)
 
 
 @mod.route('/<int:apply_id>/ratify')
+@login_required
+@check_approver
 @check_load_apply
 def ratify(apply, **kvargs):
+    smodel_dict = get_smodel_by_id()
     apply.approver = apply.approver.replace(current_user.id, current_user.id+':ok')
-    apply.status = 3
 
-    db.session.add(apply)
-    db.session.commit()
-
-    if check_vm_apply(apply.id):
+    if check_apply_status(apply.id):
+      if smodel_dict[apply.s_id].if_v:
         if create_vm(apply.id, apply.days):
             apply.status = 6
         else:
             apply.status = 7
 
-        db.session.add(apply)
-        db.session.commit()
+    db.session.add(apply)
+    db.session.commit()
 
-    return redirect(url_for('.index'))
+    return redirect(url_for('apply.detail', apply_id=apply.id))
 
 
 @mod.route('/<int:apply_id>/deny')
+@login_required
+@check_approver
 @check_load_apply
 def deny(apply, **kvargs):
     apply.approver = apply.approver.replace(current_user.id, current_user.id+':deny')

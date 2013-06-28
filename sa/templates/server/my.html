@@ -1,0 +1,107 @@
+{% extends "server/layout.html" %}
+
+{% block add_head %}
+<script src="{{ url_for('static',filename='js/page/server_my.js') }}"></script>
+{% endblock %}
+
+{% block content_body %}
+<div id="renew" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h4 id="myModalLabel">测试机续期</h4>
+  </div>
+  <div class="modal-body form-horizontal">
+    <div class="control-group">
+      <label class="control-label" for="renewDays">天数</label>
+      <div class="controls">
+        <input type="text" id="renewDays">
+        <input type="hidden" id="renewUrl">
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">取消</button>
+    <button class="btn btn-primary" id="renewSubmit">确定</button>
+  </div>
+</div>
+
+<div class="accordion">
+  <div class="accordion-group">
+    <div class="accordion-heading">
+      <a class="accordion-toggle" data-toggle="collapse" href="#sTest">测试机</a>
+    </div>
+    <div id="sTest" class="accordion-body collapse in">
+      <div class="accordion-inner">
+        <table class="table table-hover clean">
+          <thead>
+            <tr>
+              <td width="10%">主机名</td>
+              <td width="20%">IP</td>
+              <td width="10%">状态</td>
+              <td width="15%">剩余时间</td>
+              <td width="15%">标记</td>
+              <td width="20%">型号</td>
+              <td width="10%">操作</td>
+            </tr>
+          </thead>
+          <tbody>
+            {% for s in server %}
+            {% if s.if_t %}
+            <tr class="tinfo" data-sid="{{ s.id }}">
+              <td>loading...</td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td>{{ apply[s.apply_id].name }}</td>
+              <td>{{ smodel[apply[s.apply_id].s_id].stype_name }} -- {{ smodel[apply[s.apply_id].s_id].name }}</td>
+              <td>
+                <a href="#renew" data-toggle="modal" data-renew-url="{{ url_for('server.renew', server_id=s.id) }}"><i class="icon-time"></i></a>
+                <a href="{{ url_for('server.delete', server_id=s.id) }}"><i class="icon-remove"></i></a>
+              </td>
+            </tr>
+            {% endif %}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div><!--End sTest-->
+
+  <br/>
+
+  <div class="accordion-group">
+    <div class="accordion-heading">
+      <a class="accordion-toggle" data-toggle="collapse" href="#sProduction">线上机器</a>
+    </div>
+    <div id="sProduction" class="accordion-body collapse in">
+      <div class="accordion-inner">
+        <table class="table table-hover clean">
+          <thead>
+            <tr>
+              <td width="20%">主机名</td>
+              <td width="25%">IP</td>
+              <td width="15%">状态</td>
+              <td width="15%">标记</td>
+              <td width="25%">型号</td>
+            </tr>
+          </thead>
+          <tbody>
+            {% for s in server %}
+            {% if not s.if_t %}
+            <tr class="tinfo" data-sid="{{ s.id }}">
+              <td>loading...</td>
+              <td></td>
+              <td></td>
+              <td>{{ apply[s.apply_id].name }}</td>
+              <td>{{ smodel[apply[s.apply_id].s_id].stype_name }} -- {{ smodel[apply[s.apply_id].s_id].name }}</td>
+            </tr>
+            {% endif %}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div><!--End sProduction-->
+
+</div>
+{% endblock %}

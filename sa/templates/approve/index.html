@@ -19,7 +19,8 @@
               <td>型号</td>
               <td>数量</td>
               <td>申请时间</td>
-              <td width="10%">操作</td>
+              <td>申请人</td>
+              <td width="10%">详情</td>
             </tr>
           </thead>
           <tbody>
@@ -35,10 +36,8 @@
               </td>
               <td>{{ ai.s_num }}</td>
               <td>{{ ai.apply_date }}</td>
-              <td>
-                <a title="驳回" href="{{ url_for('approve.deny', apply_id=ai.id) }}"><i class="icon-remove"></i></a>
-                <a title="通过" href="{{ url_for('approve.ratify', apply_id=ai.id) }}"><i class="icon-ok"></i></a>
-              </td>
+              <td>{{ user_dict[ai.applier].chinese_name }}</td>
+              <td><a href="{{ url_for('apply.detail', apply_id=ai.id) }}"><i class="icon-chevron-right"></i></a></td>
             </tr>
             {% endfor %}
           </tbody>
@@ -49,7 +48,7 @@
   <br/>
   <div class="accordion-group">
     <div class="accordion-heading">
-      <a class="accordion-toggle" data-toggle="collapse" href="#sProduction">历史</a>
+      <a class="accordion-toggle" data-toggle="collapse" href="#sProduction">历史记录</a>
     </div>
     <div id="sProduction" class="accordion-body collapse in">
       <div class="accordion-inner">
@@ -60,7 +59,9 @@
               <td>型号</td>
               <td>数量</td>
               <td>申请时间</td>
-              <td width="10%">状态</td>
+              <td>申请人</td>
+              <td>状态</td>
+              <td width="10%">详情</td>
             </tr>
           </thead>
           <tbody>
@@ -76,9 +77,11 @@
               </td>
               <td>{{ ad.s_num }}</td>
               <td>{{ ad.apply_date }}</td>
+              <td>{{ user_dict[ad.applier].chinese_name }}</td>
               <td>
                 <span class="label {{ config['APPLY_STATUS'][ad.status]['class'] }}">{{ config['APPLY_STATUS'][ad.status]['name'] }}</span>
               </td>
+              <td><a href="{{ url_for('apply.detail', apply_id=ad.id) }}"><i class="icon-chevron-right"></i></a></td>
             </tr>
             {% endfor %}
           </tbody>

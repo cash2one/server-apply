@@ -1,7 +1,8 @@
 from flask import Flask, render_template
 from flask.ext.login import current_user
 
-app = Flask(__name__)
+app  = Flask(__name__)
+app1 = Flask(__name__)
 
 
 #
@@ -12,12 +13,29 @@ try:
 except:
     print 'Config file not found!'
 
+try:
+    app.config.from_pyfile(app.config['PRODUCTION_CONFIG'], silent=False)
+except:
+    print 'Production config not found!'
+
+try:
+    app1.config.from_object("website_config")
+except:
+    print 'Config file not found!'
+
+try:
+    app1.config.from_pyfile(app.config['PRODUCTION_CONFIG'], silent=False)
+except:
+    print 'Production config not found!'
+
+
 #
 # DB
 #
 from flask.ext.sqlalchemy import SQLAlchemy
 
-db = SQLAlchemy(app)
+db  = SQLAlchemy(app)
+db1 = SQLAlchemy(app1)
 
 #
 # Login
@@ -46,6 +64,7 @@ from sa.views import smodel
 from sa.views import approver
 from sa.views import server
 from sa.views import user
+from sa.views import idc
 
 app.register_blueprint(apply.mod)
 app.register_blueprint(approve.mod)
@@ -54,6 +73,7 @@ app.register_blueprint(smodel.mod)
 app.register_blueprint(approver.mod)
 app.register_blueprint(server.mod)
 app.register_blueprint(user.mod)
+app.register_blueprint(idc.mod)
 
 #
 # Handlers

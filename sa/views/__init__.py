@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from flask import flash
+from flask import flash, abort
+from flask.ext.login import current_user
 
 from functools import wraps
 
@@ -51,7 +52,23 @@ def check_load_server(func):
 def check_admin(func):
     @wraps(func)
     def wrapper(**kvargs):
-        if not current_user.if_admin: return '403'
+        if not current_user.if_admin:
+            return abort(403)
+        return func(**kvargs)
     return wrapper
 
+def check_approver(func):
+    @wraps(func)
+    def wrapper(**kvargs):
+        if not current_user.if_approver:
+            return abort(403)
+        return func(**kvargs)
+    return wrapper
 
+def check_idc(func):
+    @wraps(func)
+    def wrapper(**kvargs):
+        if not current_user.if_idc:
+            return abort(403)
+        return func(**kvargs)
+    return wrapper

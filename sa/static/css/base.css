@@ -2,6 +2,10 @@ body {
     padding-top: 60px;
 }
 
+table a {
+    color: #333333;
+}
+
 .clean {
     background: none;
     margin: 0;
@@ -22,7 +26,7 @@ body {
     height: 15em;
 }
 
-.container thead {
+.bg thead {
     background-color: #EEE;
 }
 
@@ -32,4 +36,12 @@ body {
 
 .accordion-body thead {
     background-color: #FFF;
+}
+
+.sidebar .control-label {
+    width: 40px !important;
+}
+
+.sidebar .controls {
+    margin-left: 60px;
 }

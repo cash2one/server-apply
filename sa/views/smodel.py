@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 
 from flask import Blueprint, url_for, render_template, redirect, request, flash
+from flask.ext.login import login_required
 from flask.ext.wtf import Form, TextField, RadioField, TextAreaField, SelectField, required, length, regexp
 
 import simplejson as json
 
 from sa import db
 from sa.models import Stype, Smodel, Approver
-from sa.getter import get_smodel_by_id
+from sa.getter import get_smodel_by_id, get_approver_by_id
 from sa.views import *
 
 mod = Blueprint('smodel', __name__,  url_prefix='/smodel')
@@ -17,10 +18,12 @@ mod = Blueprint('smodel', __name__,  url_prefix='/smodel')
 def index():
     stype = Stype.query.all()
     smodel = Smodel.query.all()
-    return render_template('smodel/index.html', stype=stype, smodel=smodel)
+    flow = get_approver_by_id()
+    return render_template('smodel/index.html', stype=stype, smodel=smodel, flow=flow)
 
 
 @mod.route('/add', methods=['GET','POST'])
+@login_required
 def add():
     form = SmodelForm()
     form.stype_id.choices = [(t.id, t.name) for t in Stype.query.all()]
@@ -31,7 +34,7 @@ def add():
 
     try:
         smodel = Smodel(form.name.data, form.stype_id.data, form.cpucores.data, form.memsize.data,
-                        form.disk.data, form.if_v.data, form.if_t.data, form.template.data, form.approver_id.data)
+                        form.disk.data, form.if_v.data, form.template.data, form.approver_id.data)
         db.session.add(smodel)
         db.session.commit()
     except:
@@ -43,6 +46,7 @@ def add():
 
 
 @mod.route('/<int:smodel_id>/edit', methods=['GET','POST'])
+@login_required
 @check_load_smodel
 def edit(smodel, **kvargs):
     form = SmodelForm(obj=smodel)
@@ -64,7 +68,22 @@ def edit(smodel, **kvargs):
     return redirect(url_for('.index'))
 
 
+@mod.route('/<int:smodel_id>/show')
+@login_required
+@check_load_smodel
+def show(smodel, **kvargs):
+    form = SmodelForm(obj=smodel)
+    stype = Stype.query.get(smodel.stype_id)
+    flow = Approver.query.get(smodel.approver_id)
+    try:
+        rtn = request.headers.get('Referer')
+    except:
+        rtn = url_for('.index')
+    return render_template('smodel/show.html', form=form, smodel=smodel, stype=stype, flow=flow, rtn=rtn)
+
+
 @mod.route('/<int:smodel_id>/delete', methods=['GET','POST'])
+@login_required
 @check_load_smodel
 def delete(smodel, **kvargs):
     form = SmodelForm(obj=smodel)
@@ -85,6 +104,7 @@ def delete(smodel, **kvargs):
 
 
 @mod.route('/<int:smodel_id>/arrowup')
+@login_required
 @check_load_smodel
 def arrowup(smodel, **kvargs):
     flash(u'arrow up', 'info')
@@ -92,6 +112,7 @@ def arrowup(smodel, **kvargs):
 
 
 @mod.route('/<int:smodel_id>/arrowdown')
+@login_required
 @check_load_smodel
 def arrowdown(smodel, **kvargs):
     flash(u'arrow down', 'info')

@@ -1,0 +1,44 @@
+{% extends "layout.html" %}
+
+{% block nav %}
+{% from 'import/nav.html' import nav %}
+{{ nav(current_user, '') }}
+{% endblock %}
+
+{% block content_body %}
+<table class="table table-hover bg">
+  <thead>
+    <tr>
+      <td>简述</td>
+      <td>型号</td>
+      <td>数量</td>
+      <td>状态</td>
+      <td>申请时间</td>
+      <td>申请人</td>
+      <td width="5%">详情</td>
+    </tr>
+  </thead>
+  <tbody>
+    {% for a in apply %}
+    <tr>
+      <td>{{ a.name }}</td>
+      <td>
+      {% if smodel_dict[a.s_id]: %}
+        {{ smodel_dict[a.s_id].stype_name }} -- {{ smodel_dict[a.s_id].name }}
+      {% else: %}
+        NULL -- NULL
+      {% endif %}
+      </td>
+      <td>{{ a.s_num }}</td>
+      <td><span class="label {{ config['APPLY_STATUS'][a.status]['class'] }}">{{ config['APPLY_STATUS'][a.status]['name'] }}</span></td>
+      <td>{{ a.apply_date }}</td>
+      <td>{{ user_dict[a.applier].chinese_name }}</td>
+      <td>
+        <a href="{{ url_for('apply.delete', apply_id=a.id) }}"><i class="icon-remove"></i></a>
+        <a href="{{ url_for('apply.detail', apply_id=a.id) }}"><i class="icon-chevron-right"></i></a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

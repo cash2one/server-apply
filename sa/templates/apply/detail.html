@@ -1,0 +1,151 @@
+{% extends "apply/layout.html" %}
+
+{% block add_head %}
+<link href="{{ url_for('static',filename='css/page/apply_detail.css') }}" rel="stylesheet">
+<script src="{{ url_for('static',filename='js/page/apply_detail.js') }}"></script>
+{% endblock %}
+
+{% block content_body %}
+<div class="span3">
+  <div class="form form-horizontal sidebar">
+    <legend>基本信息</legend>
+    <div class="control-group">
+      <label class="control-label">简述</label>
+      <div class="controls padding-t5">{{ apply.name }}</div>
+    </div>
+    <div class="control-group">
+      <label class="control-label">型号</label>
+      <div class="controls padding-t5">{{ smodel_dict[apply.s_id].stype_name }} -- {{ smodel_dict[apply.s_id].name }}</div>
+    </div>
+    <div class="control-group">
+      <label class="control-label">数量</label>
+      <div class="controls padding-t5">{{ apply.s_num }}</div>
+    </div>
+    <div class="control-group">
+      <label class="control-label">状态</label>
+      <div class="controls padding-t5">
+        <span class="label {{ config['APPLY_STATUS'][apply.status]['class'] }}">{{ config['APPLY_STATUS'][apply.status]['name'] }}</span>
+      </div>
+    </div>
+    <div class="control-group">
+      <label class="control-label">时间</label>
+      <div class="controls padding-t5">{{ apply.apply_date }}</div>
+    </div>
+    <div class="control-group">
+      <label class="control-label">申请人</label>
+      <div class="controls padding-t5">{{ user_dict[apply.applier].chinese_name }}</div>
+    </div>
+    {% if apply.applier==current_user.username %}
+    <div class="control-group">
+      <label class="control-label">操作</label>
+      <div class="controls padding-t5">
+        <a href="{{ url_for('apply.ack', apply_id=apply.id) }}">
+          <button class="btn btn-small btn-primary" type="button" {% if apply.status!=6 %}disabled{% endif %}>确认交付</button>
+        </a>
+        <a href="{{ url_for('apply.cancle', apply_id=apply.id) }}">
+          <button class="btn btn-small btn-inverse" type="button" {% if apply.status==4 or apply.status==5 %}disabled{% endif %}>取消申请</button>
+        </a>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="span8">
+  <div class="form form-horizontal">
+    <legend>审批</legend>
+    {% if apply.status==5 %}
+    <div class="control-group">
+      <label class="control-label">已取消申请</label>
+    </div>
+    {% endif %}
+    {% if flow_arr==[] and apply.status!=5 %}
+    <div class="control-group">
+      <label class="control-label">无需审批</label>
+    </div>
+    {% endif %}
+    {% if apply.status!=5 %}
+    {% for f in flow_arr %}
+    <div class="control-group">
+      <label class="control-label">{{ user_dict[f.username].chinese_name }}</label>
+      <div class="controls padding-t5">
+      {% if f.status=="审核中" and f.username==current_user.username %}
+        <a href="{{ url_for('approve.ratify', apply_id=apply.id) }}"><button class="btn btn-small">通过</button></a>
+        <a href="{{ url_for('approve.deny', apply_id=apply.id) }}"><button class="btn btn-small btn-danger">驳回</button></a>
+      {% else %}
+        <span class="label {{ f.class }}">{{ f.status }}</span>
+      {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+  </div>
+
+  <legend>机器列表
+    {% if current_user.if_idc and apply.status==3 and not smodel_dict[apply.s_id].if_v %}
+    <form class="form-inline pull-right" method="post" action="{{ url_for('apply.attach_server', apply_id=apply.id) }}">
+      <input id="hostname" name="hostname" type="text" class="input-small" placeholder="主机名">
+      <button type="submit" class="btn">添加</button>
+      <a class="btn" href="{{ url_for('apply.server_ready', apply_id=apply.id) }}">完成</a>
+    </form>
+    {% endif %}
+    {% if current_user.if_admin and apply.status==7 %}
+    <a class="btn pull-right" href="{{ url_for('apply.recreate_server', apply_id=apply.id) }}">重新创建</a>
+    {% endif %}
+  </legend>
+  <table id="slist" class="table table-hover">
+    <thead>
+      <tr>
+        <td>机器名</td>
+        <td>IP</td>
+        <td>状态</td>
+        <td>类型</td>
+        {% if current_user.idc and smodel_dict[apply.s_id].if_v %}
+        <td width="10%">操作</td>
+        {% endif %}
+      </tr>
+    </thead>
+    <tbody>
+      {% if server==[] %}
+      <tr>
+        <td colspan="5">Null</td>
+      </tr>
+      {% else %}
+      {% for s in server %}
+      <tr class="getsinfo" data-sid="{{ s.id }}">
+        <td>loading...</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        {% if current_user.idc and smodel_dict[apply.s_id].if_v %}
+        <td><a href="{{ url_for('apply.detach_server', apply_id=apply.id, server_id=s.id) }}"><i class="icon-remove"></i></a></td>
+        {% endif %}
+      </tr>
+      {% endfor %}
+      {% endif %}
+    </tbody>
+  </table>
+
+  <legend>评论</legend>
+  {% for c in comment %}
+  <div class="row-fluid comment">
+    <div class="span1"><img src="{{ user_dict[c.user].gravatar_url }}" class="img-polaroid avatar"></div>
+    <div class="span11">
+      <div><strong>{{ user_dict[c.user].chinese_name }}</strong> 发表于 {{ c.comment_time }}</div>
+      <hr/>
+      {{ c.msg|safe }}
+    </div>
+  </div>
+  {% endfor %}
+
+  <div class="row-fluid">
+    <div class="span1"><img src="{{ user_dict[current_user.username].gravatar_url }}" class="img-polaroid avatar"></div>
+    <div class="span11">
+      <form method="post" action="{{ url_for('apply.comment', apply_id=apply.id) }}">
+        <textarea id="msg" name="msg" rows="6" class="span12"></textarea><br/>
+        <button class="btn btn-primary" type="submit">评论</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

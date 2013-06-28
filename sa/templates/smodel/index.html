@@ -5,41 +5,33 @@
 {% endblock %}
 
 {% block content_body %}
-<div id="templateModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-    <h4 id="myModalLabel">模板详情</h4>
-  </div>
-  <div class="modal-body">
-  </div>
-  <div class="modal-footer">
-    <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
-  </div>
-</div>
-
+{% if current_user.if_admin %}
 <div class="container" style="text-align:right;">
   <a href="{{ url_for('stype.add') }}" role="button" class="btn btn-primary">添加栏目</a>
   <a href="{{ url_for('smodel.add') }}" role="button" class="btn btn-primary">添加型号</a>
 </div>
+{% endif %}
 
 {% for t in stype %}
 <h5>
   {{ t.name }}
+  {% if current_user.if_admin %}
   <a class="hide" href="{{ url_for('stype.arrowup', stype_id=t.id) }}"><i class="icon-arrow-up"></i></a>
   <a class="hide" href="{{ url_for('stype.arrowdown', stype_id=t.id) }}"><i class="icon-arrow-down"></i></a>
   <a class="hide" href="{{ url_for('stype.edit', stype_id=t.id) }}"><i class="icon-edit"></i></a>
   <a class="hide" href="{{ url_for('stype.delete', stype_id=t.id) }}"><i class="icon-remove"></i></a>
+  {% endif %}
 </h5>
-<table class="table table-hover table-bordered">
+<table class="table table-hover table-bordered bg">
   <thead>
     <tr>
       <td width="15%">型号</td>
       <td width="10%">CPU核数</td>
       <td width="10%">内存</td>
-      <td>磁盘</td>
-      <td width="20%">机器类型</td>
-      <td width="15%">模板</td>
-      <td width="10%">操作</td>
+      <td width="10%">磁盘</td>
+      <td width="15%">机器类型</td>
+      <td>审批流程</td>
+      <td width="12%">操作</td>
     </tr>
   </thead>
   <tbody>
@@ -51,12 +43,15 @@
       <td>{{ m.memsize }}G</td>
       <td>{{ m.disk }}</td>
       <td>{{ '虚拟机' if m.if_v else '物理机' }}</td>
-      <td><a href="#templateModal" data-toggle="modal" data-url="{{ url_for('smodel.template', smodel_id=m.id) }}">详情</a></td>
+      <td>{{ flow[m.approver_id].value }}</td>
       <td>
+        {% if current_user.if_admin %}
         <a href="{{ url_for('smodel.arrowup', smodel_id=m.id) }}"><i class="icon-arrow-up"></i></a>
         <a href="{{ url_for('smodel.arrowdown', smodel_id=m.id) }}"><i class="icon-arrow-down"></i></a>
         <a href="{{ url_for('smodel.edit', smodel_id=m.id) }}"><i class="icon-edit"></i></a>
         <a href="{{ url_for('smodel.delete', smodel_id=m.id) }}"><i class="icon-remove"></i></a>
+        {% endif %}
+        <a href="{{ url_for('smodel.show', smodel_id=m.id) }}"><i class="icon-list-alt"></i></a>
         <a href="{{ url_for('apply.new', smodel_id=m.id) }}"><i class="icon-arrow-right"></i></a>
       </td>
     </tr>

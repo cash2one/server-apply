@@ -4,8 +4,9 @@ from os.path import dirname,abspath
 
 # Base config
 ROOT_DIR = dirname(abspath(__file__))
-
 DEBUG = True
+HOST = "http://sapply.corp.anjuke.com"
+PRODUCTION_CONFIG = 'website_config_production.py'
 
 
 # Auth info
@@ -19,17 +20,17 @@ LOGOUT_URL = AUTH_URL + '/logout.php?client_id=' + AUTH_ID + '&client_secret=' +
 SECRET_KEY = "e8c2817caf87191bf337f505bef5d2bf"
 
 
-# Roles
-Admin = ['gywang', 'daoyuan']
-OPS = ['fzhou']
-Approver = ['daoyuan', 'kevin', 'justin']
-
-
 # DB
 SQLALCHEMY_DATABASE_URI = 'mysql+oursql://caixh:caixh123@192.168.1.103/sapply'
 SQLALCHEMY_BINDS = {
     'zeus': 'mysql+oursql://caixh:caixh123@192.168.1.103/zeus',
 }
+
+
+# SMTP Server
+SMTP_HOST = 'xapp10-048.i.ajkdns.com'
+SMTP_PORT = 25
+SENDER = 'noreply@dm.anjuke.com'
 
 
 # APC config
