@@ -100,7 +100,7 @@
         <td>IP</td>
         <td>状态</td>
         <td>类型</td>
-        {% if current_user.idc and smodel_dict[apply.s_id].if_v %}
+        {% if current_user.if_idc and not smodel_dict[apply.s_id].if_v %}
         <td width="10%">操作</td>
         {% endif %}
       </tr>
@@ -117,7 +117,7 @@
         <td></td>
         <td></td>
         <td></td>
-        {% if current_user.idc and smodel_dict[apply.s_id].if_v %}
+        {% if current_user.if_idc and not smodel_dict[apply.s_id].if_v %}
         <td><a href="{{ url_for('apply.detach_server', apply_id=apply.id, server_id=s.id) }}"><i class="icon-remove"></i></a></td>
         {% endif %}
       </tr>

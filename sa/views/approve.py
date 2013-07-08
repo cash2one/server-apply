@@ -39,11 +39,13 @@ def ratify(apply, **kvargs):
     apply.approver = apply.approver.replace(current_user.id, current_user.id+':ok')
 
     if check_apply_status(apply.id):
-      if smodel_dict[apply.s_id].if_v:
-        if create_vm(apply.id, apply.days):
-            apply.status = 6
+        if smodel_dict[apply.s_id].if_v:
+            apply.status = 6 if create_vm(apply.id, apply.days) else 7
         else:
-            apply.status = 7
+            subject = "您有新的物理机需求需要处理"
+            content = "%s%s" % (app.config['HOST'], url_for('apply.detail', apply_id=apply.id))
+            for u in UserDB.query.filter(UserDB.if_idc==1):
+                send_mail(u.email, subject, content)
 
     db.session.add(apply)
     db.session.commit()

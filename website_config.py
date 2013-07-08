@@ -25,6 +25,7 @@ SQLALCHEMY_DATABASE_URI = 'mysql+oursql://caixh:caixh123@192.168.1.103/sapply'
 SQLALCHEMY_BINDS = {
     'zeus': 'mysql+oursql://caixh:caixh123@192.168.1.103/zeus',
 }
+SQLALCHEMY_POOL_RECYCLE = 7200
 
 
 # SMTP Server

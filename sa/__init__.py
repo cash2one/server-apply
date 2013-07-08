@@ -35,7 +35,7 @@ except:
 from flask.ext.sqlalchemy import SQLAlchemy
 
 db  = SQLAlchemy(app)
-db1 = SQLAlchemy(app1)
+db1 = SQLAlchemy(app1, session_options={"autocommit":True, "autoflush":True})
 
 #
 # Login

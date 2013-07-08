@@ -99,7 +99,6 @@ def get_apply_by_id():
 
 
 def vm_to_zeus(xml, apply):
-    ret = True
     zeususer_dict = get_zeususer_by_username()
 
     xmldoc = minidom.parseString(xml)
@@ -130,7 +129,7 @@ def check_apply_status(apply_id):
         if i=='': continue
         if not re.search(':', i) and not mail_flag:
             mail_flag = True
-            mail_title = "[服务器申请系统] 您有新的申请需要审批"
+            mail_title = "您有新的申请需要审批"
             mail_content = u"简述：%s<br/>\n型号：%s -- %s<br/>\n数量：%d<br/>\n申请时间：%s<br/>\n申请人：%s<br/>\n审批入口：<a href=\"%s%s\">%s%s</a>" % (
                            apply.name, smodel_dict[apply.s_id].stype_name, smodel_dict[apply.s_id].name,
                            apply.s_num, apply.apply_date, user_dict[apply.applier].chinese_name,
@@ -178,8 +177,8 @@ def create_vm(apply_id, days):
         db.session.add(server)
         db.session.commit()
 
-    if ret==True:
-        subject = "[服务器申请系统]您的机器已经创建完毕，请验收"
+    if ret:
+        subject = "您的机器已经创建完毕，请验收"
         content = "%s%s" % (app.config['HOST'], url_for('apply.detail', apply_id=apply.id))
         send_mail(user_dict[apply.applier].email, subject, content)
 
@@ -208,7 +207,7 @@ def delete_zeus_item(zeus_id):
 
 def send_mail(receiver, subject, content):
     msg = MIMEMultipart()
-    msg['From'] = app.config['SENDER']
+    msg['From'] = "服务器申请系统 <%s>" % app.config['SENDER']
     msg['To'] = receiver
     msg['Subject'] = Header(subject, charset='UTF-8')
 

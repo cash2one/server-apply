@@ -13,6 +13,7 @@ mod = Blueprint('approver', __name__,  url_prefix='/approver')
 
 @mod.route('/')
 @login_required
+@check_admin
 def index():
     approver = Approver.query.all()
     return render_template('approver/index.html', approver=approver) 
@@ -20,6 +21,7 @@ def index():
 
 @mod.route('/add', methods=['GET','POST'])
 @login_required
+@check_admin
 def add():
     form = ApproverForm()
 
@@ -41,6 +43,7 @@ def add():
 
 @mod.route('/<int:approver_id>/edit', methods=['GET','POST'])
 @login_required
+@check_admin
 @check_load_approver
 def edit(approver, **kvargs):
     form = ApproverForm(obj=approver)
@@ -62,6 +65,7 @@ def edit(approver, **kvargs):
 
 @mod.route('/<int:approver_id>/delete', methods=['GET','POST'])
 @login_required
+@check_admin
 @check_load_approver
 def delete(approver, **kvargs):
     form = ApproverForm(obj=approver)

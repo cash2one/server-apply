@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
 from flask import Blueprint, render_template, request, redirect, url_for
-from flask.ext.login import login_required
+from flask.ext.login import login_required, current_user
 
 import urllib2, simplejson as json
 
 from xml.dom import minidom
-from time import localtime, strftime, strptime, mktime
+from time import localtime, strftime, strptime, mktime, time
 from sqlalchemy import and_
 
 from sa import app, db
@@ -28,16 +28,15 @@ def my():
 
 @mod.route('/check_expired')
 def check_expired():
-    ret = "ok"
-    server_t = Server.query.filter(Server.if_t==1).all()
+    for s in Server.query.filter(Server.if_t==1):
+        create_time = "%s" % s.create_time
+        if s.days*86400  - (mktime(localtime()) - mktime(strptime(create_time, "%Y-%m-%d %H:%M:%S"))) < 0:
+            delete_vm(s.vm_id)
+            delete_zeus_item(s.zeus_id)
+            db.session.delete(s)
+            db.session.commit()
 
-    for st in server_t:
-        create_time = "%s" % st.create_time
-        if st.days*86400  - (mktime(localtime()) - mktime(strptime(create_time, "%Y-%m-%d %H:%M:%S"))) < 0:
-            delete_vm(st.vm_id)
-            delete_zeus_item(st.zeus_id)
-
-    return ret
+    return strftime('%Y-%m-%d %H:%M:%S', localtime(time()))
 
 
 @mod.route('/<int:server_id>/getinfo')
@@ -88,6 +87,9 @@ def getinfo(server, **kvargs):
 @login_required
 @check_load_server
 def renew(server, **kvargs):
+    if server.applier!=current_user.username:
+        abort(403)
+
     create_time = "%s" % server.create_time
     daysleft_ts = server.days*86400  - (mktime(localtime()) - mktime(strptime(create_time, "%Y-%m-%d %H:%M:%S")))
 
@@ -111,6 +113,9 @@ def renew(server, **kvargs):
 @login_required
 @check_load_server
 def delete(server, **kvargs):
+    if server.applier!=current_user.username:
+        abort(403)
+
     if server.if_t:
         delete_vm(server.vm_id)
         delete_zeus_item(server.zeus_id)

@@ -56,7 +56,7 @@
               <td>{{ smodel[apply[s.apply_id].s_id].stype_name }} -- {{ smodel[apply[s.apply_id].s_id].name }}</td>
               <td>
                 <a href="#renew" data-toggle="modal" data-renew-url="{{ url_for('server.renew', server_id=s.id) }}"><i class="icon-time"></i></a>
-                <a href="{{ url_for('server.delete', server_id=s.id) }}"><i class="icon-remove"></i></a>
+                <a href="{{ url_for('server.delete', server_id=s.id) }}" onclick="return confirm('你确定要删除该虚拟机吗?')"><i class="icon-remove"></i></a>
               </td>
             </tr>
             {% endif %}

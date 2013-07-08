@@ -75,8 +75,8 @@ def new(smodel_id, **kvargs):
         db.session.add(comment)
         db.session.commit()
 
-    if smodel[form.s_id.data].if_v:
-        if check_apply_status(sapply.id):
+    if check_apply_status(sapply.id):
+        if smodel[form.s_id.data].if_v:
             if create_vm(sapply.id, sapply.days):
                 sapply.status = 6
             else:
@@ -85,7 +85,14 @@ def new(smodel_id, **kvargs):
             db.session.add(sapply)
             db.session.commit()
 
+            flash(u'创建成功，请验收！', 'success')
             return redirect(url_for('.index'))
+        else:
+            idc_email = [u.email for u in UserDB.query.filter(UserDB.if_idc==1)]
+            subject = "您有新的物理机申请需要处理"
+            content = "%s%s" % (app.config['HOST'], url_for('apply.detail', apply_id=sapply.id))
+            send_mail(idc_email, subject, content)
+            
 
     flash(u'申请提交成功!', 'info')
     return redirect(url_for('.index'))
@@ -164,6 +171,7 @@ def comment(apply, **kvargs):
 
 @mod.route('/<int:apply_id>/recreate_server')
 @login_required
+@check_admin
 @check_load_apply
 def recreate_server(apply, **kvargs):
     if create_vm(apply.id, apply.days):
@@ -181,6 +189,7 @@ def recreate_server(apply, **kvargs):
 
 @mod.route('/<int:apply_id>/attach_server', methods=['POST'])
 @login_required
+@check_idc
 @check_load_apply
 def attach_server(apply, **kvargs):
     zeusitem = ZeusItem.query.filter(ZeusItem.label==request.form['hostname'])
@@ -195,6 +204,7 @@ def attach_server(apply, **kvargs):
 
 @mod.route('/<int:apply_id>/detach_server/<int:server_id>', methods=['GET'])
 @login_required
+@check_idc
 @check_load_apply
 @check_load_server
 def detach_server(apply, server, **kvargs):
@@ -205,11 +215,19 @@ def detach_server(apply, server, **kvargs):
 
 @mod.route('/<int:apply_id>/server_ready')
 @login_required
+@check_idc
 @check_load_apply
 def server_ready(apply, **kvargs):
+    user_dict = get_user_by_username()
+
+    subject = "您的机器已经准备完毕，请验收"
+    content = "%s%s" % (app.config['HOST'], url_for('apply.detail', apply_id=apply.id))
+    send_mail(user_dict[apply.applier].email, subject, content)
+
     apply.status = 6
     db.session.add(apply)
     db.session.commit()
+
     return redirect(url_for('.detail', apply_id=apply.id))
 
 
@@ -235,6 +253,7 @@ def cancle(apply, **kvargs):
         if s.vm_id == None: continue
         delete_vm(s.vm_id)
         delete_zeus_item(s.zeus_id)
+
     Server.query.filter(Server.apply_id == apply.id).delete()
 
     db.session.add(apply)
@@ -245,6 +264,7 @@ def cancle(apply, **kvargs):
 
 @mod.route('/<int:apply_id>/delete')
 @login_required
+@check_admin
 @check_load_apply
 def delete(apply, **kvargs):
     for s in Server.query.filter(Server.apply_id == apply.id):

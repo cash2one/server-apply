@@ -13,6 +13,7 @@ mod = Blueprint('stype', __name__,  url_prefix='/stype')
 
 @mod.route('/add', methods=['GET', 'POST'])
 @login_required
+@check_admin
 def add():
     form = StypeForm()
 
@@ -34,6 +35,7 @@ def add():
 
 @mod.route('/<int:stype_id>/edit', methods=['GET', 'POST'])
 @login_required
+@check_admin
 @check_load_stype
 def edit(stype, **kvargs):
     form = StypeForm(obj=stype)
@@ -55,6 +57,7 @@ def edit(stype, **kvargs):
 
 @mod.route('/<int:stype_id>/delete', methods=['GET', 'POST'])
 @login_required
+@check_admin
 @check_load_stype
 def delete(stype, **kvargs):
     form = StypeForm(obj=stype)
@@ -76,6 +79,7 @@ def delete(stype, **kvargs):
 
 @mod.route('/<int:stype_id>/arrowup', methods=['GET', 'POST'])
 @login_required
+@check_admin
 @check_load_stype
 def arrowup(stype, **kvargs):
     flash(u'arrow up', 'info')
@@ -84,6 +88,7 @@ def arrowup(stype, **kvargs):
 
 @mod.route('/<int:stype_id>/arrowdown', methods=['GET', 'POST'])
 @login_required
+@check_admin
 @check_load_stype
 def arrowdown(stype, **kvargs):
     flash(u'arrow down', 'info')

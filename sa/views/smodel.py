@@ -24,6 +24,7 @@ def index():
 
 @mod.route('/add', methods=['GET','POST'])
 @login_required
+@check_admin
 def add():
     form = SmodelForm()
     form.stype_id.choices = [(t.id, t.name) for t in Stype.query.all()]
@@ -47,6 +48,7 @@ def add():
 
 @mod.route('/<int:smodel_id>/edit', methods=['GET','POST'])
 @login_required
+@check_admin
 @check_load_smodel
 def edit(smodel, **kvargs):
     form = SmodelForm(obj=smodel)
@@ -84,6 +86,7 @@ def show(smodel, **kvargs):
 
 @mod.route('/<int:smodel_id>/delete', methods=['GET','POST'])
 @login_required
+@check_admin
 @check_load_smodel
 def delete(smodel, **kvargs):
     form = SmodelForm(obj=smodel)
