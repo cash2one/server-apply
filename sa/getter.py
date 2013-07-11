@@ -6,6 +6,7 @@ from flask.ext.login import current_user
 import urllib, hashlib
 import urllib2, re
 import smtplib, mimetypes
+import socket
 
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -173,11 +174,15 @@ def create_vm(apply_id, days):
         zeus_id = vm_to_zeus(result, apply)
 
         server = Server(apply_id, zeus_id, vm_id, smodel[apply.s_id].if_t, 
-                        days, strftime("%Y-%m-%d %H:%M:%S", localtime()), apply.applier)
+                        days, strftime("%Y-%m-%d %H:%M:%S", localtime()), apply.applier, 0)
         db.session.add(server)
         db.session.commit()
 
     if ret:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.connect((app.config['DNS_SERVER'], 9991))
+        sock.send('COMMAND 10')
+        sock.close()
         subject = "您的机器已经创建完毕，请验收"
         content = "%s%s" % (app.config['HOST'], url_for('apply.detail', apply_id=apply.id))
         send_mail(user_dict[apply.applier].email, subject, content)

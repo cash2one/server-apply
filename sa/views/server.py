@@ -10,11 +10,22 @@ from time import localtime, strftime, strptime, mktime, time
 from sqlalchemy import and_
 
 from sa import app, db
-from sa.models import Server, ZeusItem, ZeusIP
+from sa.models import Server, ZeusItem, ZeusIP, Sapply
 from sa.getter import *
 from sa.views import *
 
 mod = Blueprint('server', __name__,  url_prefix='/server')
+
+
+@mod.route('/')
+@login_required
+@check_admin
+def index():
+    user_dict = get_user_by_username()
+    server = Server.query.all()
+    apply = get_apply_by_id()
+    smodel = get_smodel_by_id()
+    return render_template('server/my.html', server=server, apply=apply, smodel=smodel, user_dict=user_dict, showall=True)
 
 
 @mod.route('/my')
@@ -23,17 +34,36 @@ def my():
     server = Server.query.filter(Server.applier==current_user.id)
     apply = get_apply_by_id()
     smodel = get_smodel_by_id()
-    return render_template('server/my.html', server=server, apply=apply, smodel=smodel)
+    return render_template('server/my.html', server=server, apply=apply, smodel=smodel, showall=False)
 
 
 @mod.route('/check_expired')
 def check_expired():
+    user_dict = get_user_by_username()
     for s in Server.query.filter(Server.if_t==1):
         create_time = "%s" % s.create_time
-        if s.days*86400  - (mktime(localtime()) - mktime(strptime(create_time, "%Y-%m-%d %H:%M:%S"))) < 0:
+        ts_left = s.days*86400  - (mktime(localtime()) - mktime(strptime(create_time, "%Y-%m-%d %H:%M:%S")))
+        if ts_left <= 0:
             delete_vm(s.vm_id)
             delete_zeus_item(s.zeus_id)
             db.session.delete(s)
+            db.session.commit()
+        elif ts_left > 0 and ts_left <= 86400 and not s.notify:
+            req = urllib2.Request("%s/%d" % (app.config['APC_URL'], s.vm_id))
+            req.add_header('Authorization', app.config['APC_AUTH'])
+            result = urllib2.urlopen(req).read()
+            xmldoc = minidom.parseString(result)
+            ip = [i.firstChild.nodeValue for i in xmldoc.getElementsByTagName('IP')]
+            zeusitem = ZeusItem.query.get(s.zeus_id)
+            apply = Sapply.query.get(s.apply_id)
+
+            subject = u"您的测试机%s将在1天后删除" % zeusitem.label
+            content = u"机器名：%s<br/>\n用途：%s<br/>\nIP：%s<br/>\n链接：%s%s" % (
+                        zeusitem.label, apply.name, ', '.join(ip), app.config['HOST'], url_for('server.my'))
+            send_mail(user_dict[s.applier].email, subject, content)
+
+            s.notify = 1
+            db.session.add(s)
             db.session.commit()
 
     return strftime('%Y-%m-%d %H:%M:%S', localtime(time()))
@@ -79,6 +109,8 @@ def getinfo(server, **kvargs):
                 daysleft_hour = int((daysleft_ts%86400)/3600)
                 daysleft_min = int(((daysleft_ts%86400)%3600)/60)
             ret['daysleft']  = "%s天%s小时%s分" % (daysleft_day, daysleft_hour, daysleft_min)
+            if daysleft_ts <= 86400:
+                ret['daysleft'] = "<font color=\"red\">%s</font>" % ret['daysleft']
     
     return json.dumps(ret)
 
@@ -102,6 +134,7 @@ def renew(server, **kvargs):
         flash(u'最大天数不可以超过30天', 'warning')
     else:
         server.days += renew_days
+        server.notify = 0
         db.session.add(server)
         db.session.commit()
         flash(u'续期成功', 'success')

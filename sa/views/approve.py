@@ -20,8 +20,8 @@ def index():
     user_dict = get_user_by_username()
     appling = Sapply.query.filter(and_(or_(Sapply.approver==current_user.id,
                                            Sapply.approver.like(current_user.id +"->%"),
-                                           Sapply.approver.like("%:ok"+ current_user.id),
-                                           Sapply.approver.like("%:ok"+ current_user.id +"->%")),
+                                           Sapply.approver.like("%:ok->"+ current_user.id),
+                                           Sapply.approver.like("%:ok->"+ current_user.id +"->%")),
                                        Sapply.status==1)).order_by(desc(Sapply.id)).all()
 
     applied = Sapply.query.filter(Sapply.approver.like("%"+ current_user.id +":%")).order_by(desc(Sapply.id)).all()

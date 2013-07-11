@@ -35,13 +35,16 @@
         <table class="table table-hover clean">
           <thead>
             <tr>
-              <td width="10%">主机名</td>
+              <td width="9%">主机名</td>
               <td width="20%">IP</td>
-              <td width="10%">状态</td>
-              <td width="15%">剩余时间</td>
+              <td width="9%">状态</td>
+              <td width="13%">剩余时间</td>
               <td width="15%">标记</td>
               <td width="20%">型号</td>
-              <td width="10%">操作</td>
+              {% if showall %}
+              <td width="7%">申请人</td>
+              {% endif %}
+              <td width="7%">操作</td>
             </tr>
           </thead>
           <tbody>
@@ -54,6 +57,9 @@
               <td></td>
               <td>{{ apply[s.apply_id].name }}</td>
               <td>{{ smodel[apply[s.apply_id].s_id].stype_name }} -- {{ smodel[apply[s.apply_id].s_id].name }}</td>
+              {% if showall %}
+              <td>{{ user_dict[s.applier].chinese_name }}</td>
+              {% endif %}
               <td>
                 <a href="#renew" data-toggle="modal" data-renew-url="{{ url_for('server.renew', server_id=s.id) }}"><i class="icon-time"></i></a>
                 <a href="{{ url_for('server.delete', server_id=s.id) }}" onclick="return confirm('你确定要删除该虚拟机吗?')"><i class="icon-remove"></i></a>
@@ -78,11 +84,14 @@
         <table class="table table-hover clean">
           <thead>
             <tr>
-              <td width="20%">主机名</td>
+              <td width="16%">主机名</td>
               <td width="25%">IP</td>
-              <td width="15%">状态</td>
+              <td width="12%">状态</td>
               <td width="15%">标记</td>
               <td width="25%">型号</td>
+              {% if showall %}
+              <td width="7%">申请人</td>
+              {% endif %}
             </tr>
           </thead>
           <tbody>
@@ -94,6 +103,9 @@
               <td></td>
               <td>{{ apply[s.apply_id].name }}</td>
               <td>{{ smodel[apply[s.apply_id].s_id].stype_name }} -- {{ smodel[apply[s.apply_id].s_id].name }}</td>
+              {% if showall %}
+              <td>{{ user_dict[s.applier].chinese_name }}</td>
+              {% endif %}
             </tr>
             {% endif %}
             {% endfor %}

@@ -43,7 +43,7 @@
           <button class="btn btn-small btn-primary" type="button" {% if apply.status!=6 %}disabled{% endif %}>确认交付</button>
         </a>
         <a href="{{ url_for('apply.cancle', apply_id=apply.id) }}">
-          <button class="btn btn-small btn-inverse" type="button" {% if apply.status==4 or apply.status==5 %}disabled{% endif %}>取消申请</button>
+          <button class="btn btn-small btn-inverse" type="button" {% if apply.status==4 or apply.status==5 or apply.status==2 %}disabled{% endif %}>取消申请</button>
         </a>
       </div>
     </div>

@@ -18,6 +18,9 @@
           {% if current_user.if_admin %}
           <li{% if view=='user' %} class="active"{% endif %}><a href="{{ url_for('user.index') }}">用户</a></li>
           {% endif %}
+          {% if current_user.if_admin or current_user.if_approver or current_user.if_idc %}
+          <li{% if view=='server_all' %} class="active"{% endif %}><a href="{{ url_for('server.index') }}">机器列表</a></li>
+          {% endif %}
           {% if current_user.if_idc %}
           <li{% if view=='idc' %} class="active"{% endif %}><a href="{{ url_for('idc.index') }}">物理机需求</a></li>
           {% endif %}

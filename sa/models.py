@@ -111,8 +111,9 @@ class Server(db.Model):
     days = Column(Integer)
     create_time = Column(DateTime)
     applier = Column(String)
+    notify = Column(Integer)
 
-    def __init__(self, apply_id, zeus_id, vm_id, if_t, days, create_time, applier):
+    def __init__(self, apply_id, zeus_id, vm_id, if_t, days, create_time, applier, notify):
         self.apply_id = apply_id
         self.zeus_id = zeus_id
         self.vm_id = vm_id
@@ -120,6 +121,7 @@ class Server(db.Model):
         self.days = days
         self.create_time = create_time
         self.applier = applier
+        self.notify = notify
 
 
 class Comment(db.Model):

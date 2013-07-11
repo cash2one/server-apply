@@ -58,6 +58,10 @@ def new(smodel_id, **kvargs):
         form.days.data = -1
     if smodel[form.s_id.data].if_t and form.days.data == '':
         form.days.data = 7
+    if form.days.data != '':
+        if int(form.days.data) > 30:
+            flash(u'最大天数不能超过30天', 'error')
+            return render_template('apply/new.html', form=form, addition=addition)
 
     try:
         sapply = Sapply(form.name.data, form.s_id.data, form.s_num.data, 1,
@@ -196,7 +200,7 @@ def attach_server(apply, **kvargs):
     if zeusitem.count()!=1:
         flash(u'没有找到该资产信息', 'error')
     else:
-        server = Server(apply.id, zeusitem[0].id, None, 0, -1, strftime("%Y-%m-%d %H:%M:%S", localtime()), apply.applier)
+        server = Server(apply.id, zeusitem[0].id, None, 0, -1, strftime("%Y-%m-%d %H:%M:%S", localtime()), apply.applier, None)
         db.session.add(server)
         db.session.commit()
     return redirect(url_for('.detail', apply_id=apply.id))

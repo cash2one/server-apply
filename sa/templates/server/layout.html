@@ -2,5 +2,9 @@
 
 {% block nav %}
 {% from 'import/nav.html' import nav %}
+{% if showall %}
+{{ nav(current_user, 'server_all') }}
+{% else %}
 {{ nav(current_user, 'server') }}
+{% endif %}
 {% endblock %}

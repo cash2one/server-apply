@@ -6,6 +6,7 @@ from os.path import dirname,abspath
 ROOT_DIR = dirname(abspath(__file__))
 DEBUG = True
 HOST = "http://sapply.corp.anjuke.com"
+DNS_SERVER = "app10-007.i.ajkdns.com"
 PRODUCTION_CONFIG = 'website_config_production.py'
 
 
