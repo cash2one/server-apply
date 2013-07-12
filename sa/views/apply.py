@@ -74,7 +74,7 @@ def new(smodel_id, **kvargs):
         return render_template('apply/new.html', form=form, addition=addition)
 
     if form.desc.data != "":
-        comment = Comment(sapply.id, form.desc.data.replace('\n', '<br/>\n').replace('<', "&lt;").replace('>', "&gt;"),
+        comment = Comment(sapply.id, form.desc.data.replace('<', "&lt;").replace('>', "&gt;").replace('\n', '<br/>\n'),
                           strftime("%Y-%m-%d %H:%M:%S", localtime()), current_user.username)
         db.session.add(comment)
         db.session.commit()
@@ -165,7 +165,7 @@ def comment(apply, **kvargs):
     if request.method != 'POST' or request.form['msg']=="":
         return redirect(url_for('.detail', apply_id=apply.id))
 
-    comment = Comment(apply.id, request.form['msg'].replace('\n', '<br/>\n').replace('<', "&lt;").replace('>', "&gt;"),
+    comment = Comment(apply.id, request.form['msg'].replace('<', "&lt;").replace('>', "&gt;").replace('\n', '<br/>\n'),
                       strftime("%Y-%m-%d %H:%M:%S", localtime()), current_user.username)
     db.session.add(comment)
     db.session.commit()

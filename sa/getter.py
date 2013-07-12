@@ -107,7 +107,10 @@ def vm_to_zeus(xml, apply):
     ip = xmldoc.getElementsByTagName('IP')[0].firstChild.nodeValue
     name = xmldoc.getElementsByTagName('NAME')[0].firstChild.nodeValue
 
-    zeusitem = ZeusItem(6, 1, 23, '00-00-00-000', name, 1, 21, 2, zeususer_dict[apply.applier].id, zeususer_dict[apply.applier].id, apply.name)
+    if apply.applier in zeususer_dict:
+        zeusitem = ZeusItem(6, 1, 23, '00-00-00-000', name, 1, 21, 2, zeususer_dict[apply.applier].id, zeususer_dict[apply.applier].id, apply.name)
+    else:
+        zeusitem = ZeusItem(6, 1, 23, '00-00-00-000', name, 1, 21, 2, 0, 0, apply.name)
     db.session.add(zeusitem)
     db.session.commit()
 
@@ -212,7 +215,7 @@ def delete_zeus_item(zeus_id):
 
 def send_mail(receiver, subject, content):
     msg = MIMEMultipart()
-    msg['From'] = "服务器申请系统 <%s>" % app.config['SENDER']
+    msg['From'] = "%s<%s>" % (Header('服务器申请系统','utf-8'), app.config['SENDER'])
     msg['To'] = receiver
     msg['Subject'] = Header(subject, charset='UTF-8')
 

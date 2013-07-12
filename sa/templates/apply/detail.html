@@ -130,7 +130,7 @@
   {% for c in comment %}
   <div class="row-fluid comment">
     <div class="span1"><img src="{{ user_dict[c.user].gravatar_url }}" class="img-polaroid avatar"></div>
-    <div class="span11">
+    <div class="span11" style="word-wrap:break-word; word-break:break-all;">
       <div><strong>{{ user_dict[c.user].chinese_name }}</strong> 发表于 {{ c.comment_time }}</div>
       <hr/>
       {{ c.msg|safe }}
