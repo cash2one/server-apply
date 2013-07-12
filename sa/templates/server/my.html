@@ -84,13 +84,14 @@
         <table class="table table-hover clean">
           <thead>
             <tr>
-              <td width="16%">主机名</td>
-              <td width="25%">IP</td>
-              <td width="12%">状态</td>
-              <td width="15%">标记</td>
+              <td width="10%">主机名</td>
+              <td width="20%">IP</td>
+              <td width="10%">状态</td>
+              <td width="21%">标记</td>
               <td width="25%">型号</td>
               {% if showall %}
               <td width="7%">申请人</td>
+              <td width="7%">VM ID</td>
               {% endif %}
             </tr>
           </thead>
@@ -105,6 +106,7 @@
               <td>{{ smodel[apply[s.apply_id].s_id].stype_name }} -- {{ smodel[apply[s.apply_id].s_id].name }}</td>
               {% if showall %}
               <td>{{ user_dict[s.applier].chinese_name }}</td>
+              <td>one-{{ s.vm_id }}</td>
               {% endif %}
             </tr>
             {% endif %}
