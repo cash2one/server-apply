@@ -62,11 +62,12 @@ function setupVNC(){
 
     dialog.dialog({
         autoOpen:false,
-        width:829,
+        width:'auto',
         modal:true,
-        height:695,
+        height:'auto',
         resizable:true,
-        closeOnEscape: false
+        closeOnEscape: false,
+        position: ["center", 40]
     });
 
     $('#sendCtrlAltDelButton',dialog).click(function(){
