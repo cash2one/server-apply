@@ -9,7 +9,7 @@ app1 = Flask(__name__)
 # Configs
 #
 try:
-    app.config.from_object("website_config")
+    app.config.from_object("config")
 except:
     print 'Config file not found!'
 
@@ -19,7 +19,7 @@ except:
     print 'Production config not found!'
 
 try:
-    app1.config.from_object("website_config")
+    app1.config.from_object("config")
 except:
     print 'Config file not found!'
 
@@ -46,6 +46,7 @@ from sa.models import User, UserDB
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
+login_manager.login_message = None
 
 @login_manager.user_loader
 def load_user(userid):

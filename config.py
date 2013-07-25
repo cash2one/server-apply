@@ -5,20 +5,20 @@ from os.path import dirname,abspath
 # Base config
 ROOT_DIR = dirname(abspath(__file__))
 DEBUG = True
-HOST = "http://sapply.corp.anjuke.com"
-DNS_SERVER = "app10-007.i.ajkdns.com"
-PRODUCTION_CONFIG = 'website_config_production.py'
+HOST = "http://gywang.d.corp.anjuke.com"
+DNS_SERVER = "192.168.1.100"
+PRODUCTION_CONFIG = '%s/config_production.py' % ROOT_DIR
 
 
 # Auth info
 AUTH_URL = 'https://auth.corp.anjuke.com'
-AUTH_ID = 'sapply'
-AUTH_SECRET = '634bbc85'
+AUTH_ID = 'apc_dev'
+AUTH_SECRET = 'a6f261de'
 REQUEST_TOKEN_URL = AUTH_URL + '/authorize.php?client_id=' + AUTH_ID + '&response_type=code'
 ACCESS_TOKEN_URL = AUTH_URL + '/token.php?client_id=' + AUTH_ID + '&client_secret=' + AUTH_SECRET + '&grant_type=authorization_code&code=%s'
 RESOURCE_URL = AUTH_URL + '/resource.php'
 LOGOUT_URL = AUTH_URL + '/logout.php?client_id=' + AUTH_ID + '&client_secret=' + AUTH_SECRET
-SECRET_KEY = "e8c2817caf87191bf337f505bef5d2bf"
+SECRET_KEY = "g\xf3\xc3\x9a\x8e\x96jU\xb9;\xc6\xcb\x90\xc4\xf8T\xf4\x93o\x05\x99/g\xe0"
 
 
 # DB
@@ -36,7 +36,7 @@ SENDER = 'noreply@dm.anjuke.com'
 
 
 # APC config
-APC_URL = "http://apc10-001.i.ajkdns.com:4567/compute"
+APC_URL = "http://apc10-001.i.ajkdns.com:4567"
 APC_AUTH = "Basic b25lYWRtaW46NWJhYTYxZTRjOWI5M2YzZjA2ODIyNTBiNmNmODMzMWI3ZWU2OGZkOA=="
 
 

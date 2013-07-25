@@ -34,4 +34,6 @@ $(document).ready(function(){
   $("#renewSubmit").click(function(){
     window.location.href = $('#renewUrl').val() + "?days=" + $('#renewDays').val();
   });
+
+  setupVNC();
 });

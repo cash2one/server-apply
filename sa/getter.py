@@ -100,6 +100,7 @@ def get_apply_by_id():
 
 
 def vm_to_zeus(xml, apply):
+    user_dict = get_user_by_username()
     zeususer_dict = get_zeususer_by_username()
 
     xmldoc = minidom.parseString(xml)
@@ -107,10 +108,13 @@ def vm_to_zeus(xml, apply):
     ip = xmldoc.getElementsByTagName('IP')[0].firstChild.nodeValue
     name = xmldoc.getElementsByTagName('NAME')[0].firstChild.nodeValue
 
-    if apply.applier in zeususer_dict:
-        zeusitem = ZeusItem(6, 1, 23, '00-00-00-000', name, 1, 21, 2, zeususer_dict[apply.applier].id, zeususer_dict[apply.applier].id, apply.name)
-    else:
-        zeusitem = ZeusItem(6, 1, 23, '00-00-00-000', name, 1, 21, 2, 0, 0, apply.name)
+    if apply.applier not in zeususer_dict:
+        zeususer = ZeusUser(apply.applier, user_dict[apply.applier].email, user_dict[apply.applier].chinese_name, 0, 1, 1, 0)
+        db.session.add(zeususer)
+        db.session.commit()
+    zeususer_dict = get_zeususer_by_username()
+
+    zeusitem = ZeusItem(6, 1, 23, '00-00-00-000', name, 1, 21, 2, zeususer_dict[apply.applier].id, zeususer_dict[apply.applier].id, apply.name)
     db.session.add(zeusitem)
     db.session.commit()
 
@@ -162,7 +166,7 @@ def create_vm(apply_id, days):
     params = smodel[apply.s_id].template
     if smodel[apply.s_id].if_t:
         params = params.replace("ssh_pub_key_here", user_dict[apply.applier].ssh_pubkey)
-    req = urllib2.Request(app.config['APC_URL'], params)
+    req = urllib2.Request("%s/compute" % app.config['APC_URL'], params)
     req.add_header('Authorization', app.config['APC_AUTH'])
 
     for n in range(1, apply.s_num + 1 - server_cnt):
@@ -182,10 +186,13 @@ def create_vm(apply_id, days):
         db.session.commit()
 
     if ret:
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.connect((app.config['DNS_SERVER'], 9991))
-        sock.send('COMMAND 10')
-        sock.close()
+        try:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.connect((app.config['DNS_SERVER'], 9991))
+            sock.send('COMMAND 10')
+            sock.close()
+        except:
+            flash(u'重载DNS失败，请联系管理员！', 'error')
         subject = "您的机器已经创建完毕，请验收"
         content = "%s%s" % (app.config['HOST'], url_for('apply.detail', apply_id=apply.id))
         send_mail(user_dict[apply.applier].email, subject, content)
@@ -195,7 +202,7 @@ def create_vm(apply_id, days):
 
 def delete_vm(vm_id):
     try:
-        req = urllib2.Request("%s/%d" % (app.config['APC_URL'], vm_id))
+        req = urllib2.Request("%s/compute/%d" % (app.config['APC_URL'], vm_id))
         req.add_header('Authorization', app.config['APC_AUTH'])
         req.get_method = lambda: 'DELETE'
         urllib2.urlopen(req)

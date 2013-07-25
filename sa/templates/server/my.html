@@ -1,14 +1,18 @@
 {% extends "server/layout.html" %}
 
 {% block add_head %}
+<link href="{{ url_for('static',filename='jquery-ui-1.10.3.custom/css/smoothness/jquery-ui-1.10.3.custom.min.css') }}" rel="stylesheet">
+<script src="{{ url_for('static',filename='novnc/util.js') }}"></script>
 <script src="{{ url_for('static',filename='js/page/server_my.js') }}"></script>
+<script src="{{ url_for('static',filename='js/vnc.js') }}"></script>
+<script src="{{ url_for('static',filename='jquery-ui-1.10.3.custom/js/jquery-ui-1.10.3.custom.min.js') }}"></script>
 {% endblock %}
 
 {% block content_body %}
-<div id="renew" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+<div id="renew" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="renewLabel" aria-hidden="true">
   <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h4 id="myModalLabel">测试机续期</h4>
+    <h4 id="renewLabel">测试机续期</h4>
   </div>
   <div class="modal-body form-horizontal">
     <div class="control-group">
@@ -35,16 +39,17 @@
         <table class="table table-hover clean">
           <thead>
             <tr>
-              <td width="9%">主机名</td>
-              <td width="20%">IP</td>
-              <td width="9%">状态</td>
-              <td width="13%">剩余时间</td>
-              <td width="15%">标记</td>
-              <td width="20%">型号</td>
+              <td width="100px">主机名</td>
+              <td>IP</td>
+              <td width="70px">状态</td>
+              <td width="120px">剩余时间</td>
+              <td>标记</td>
+              <td>型号</td>
               {% if showall %}
-              <td width="7%">申请人</td>
+              <td width="80px">申请人</td>
               {% endif %}
-              <td width="7%">操作</td>
+              <td width="60px">控制台</td>
+              <td width="60px">操作</td>
             </tr>
           </thead>
           <tbody>
@@ -60,6 +65,7 @@
               {% if showall %}
               <td>{{ user_dict[s.applier].chinese_name }}</td>
               {% endif %}
+              <td><a href="#vnc" data-sid="{{ s.id }}"><img src="/static/img/vnc_on.png"/></a></td>
               <td>
                 <a href="#renew" data-toggle="modal" data-renew-url="{{ url_for('server.renew', server_id=s.id) }}"><i class="icon-time"></i></a>
                 <a href="{{ url_for('server.delete', server_id=s.id) }}" onclick="return confirm('你确定要删除该虚拟机吗?')"><i class="icon-remove"></i></a>
@@ -84,15 +90,16 @@
         <table class="table table-hover clean">
           <thead>
             <tr>
-              <td width="10%">主机名</td>
-              <td width="20%">IP</td>
-              <td width="10%">状态</td>
-              <td width="21%">标记</td>
-              <td width="25%">型号</td>
+              <td width="100px">主机名</td>
+              <td>IP</td>
+              <td width="100px">状态</td>
+              <td>标记</td>
+              <td>型号</td>
               {% if showall %}
-              <td width="7%">申请人</td>
-              <td width="7%">VM ID</td>
+              <td width="80px">申请人</td>
+              <td width="100px">VM ID</td>
               {% endif %}
+              <td width="60px">控制台</td>
             </tr>
           </thead>
           <tbody>
@@ -106,7 +113,16 @@
               <td>{{ smodel[apply[s.apply_id].s_id].stype_name }} -- {{ smodel[apply[s.apply_id].s_id].name }}</td>
               {% if showall %}
               <td>{{ user_dict[s.applier].chinese_name }}</td>
+              {% if s.vm_id %}
               <td>one-{{ s.vm_id }}</td>
+              {% else %}
+              <td>--</td>
+              {% endif %}
+              {% endif %}
+              {% if s.vm_id %}
+              <td><a href="#vnc" data-sid="{{ s.id }}"><img src="/static/img/vnc_on.png"/></a></td>
+              {% else %}
+              <td>--</td>
               {% endif %}
             </tr>
             {% endif %}

@@ -45,3 +45,11 @@ table a {
 .sidebar .controls {
     margin-left: 60px;
 }
+
+.navbar-fixed-top, .navbar-fixed-bottom {
+    z-index: 80;
+}
+
+.ui-widget {
+    font-size: 14px !important;
+}

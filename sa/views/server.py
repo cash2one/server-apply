@@ -49,7 +49,7 @@ def check_expired():
             db.session.delete(s)
             db.session.commit()
         elif ts_left > 0 and ts_left <= 86400 and not s.notify:
-            req = urllib2.Request("%s/%d" % (app.config['APC_URL'], s.vm_id))
+            req = urllib2.Request("%s/compute/%d" % (app.config['APC_URL'], s.vm_id))
             req.add_header('Authorization', app.config['APC_AUTH'])
             result = urllib2.urlopen(req).read()
             xmldoc = minidom.parseString(result)
@@ -88,7 +88,7 @@ def getinfo(server, **kvargs):
     else:
         ret['type'] = "虚拟机"
 
-        req = urllib2.Request("%s/%d" % (app.config['APC_URL'], server.vm_id))
+        req = urllib2.Request("%s/compute/%d" % (app.config['APC_URL'], server.vm_id))
         req.add_header('Authorization', app.config['APC_AUTH'])
         result = urllib2.urlopen(req).read()
         xmldoc = minidom.parseString(result)
@@ -156,3 +156,18 @@ def delete(server, **kvargs):
         db.session.commit()
 
     return redirect(request.headers.get('Referer'))
+
+
+@mod.route('/<int:server_id>/startvnc', methods=['POST'])
+@login_required
+@check_load_server
+def startvnc(server, **kvargs):
+    if server.applier!=current_user.username and not current_user.if_admin:
+        abort(403)
+
+    req = urllib2.Request("%s/ui/startvnc/%d" % (app.config['APC_URL'], server.vm_id))
+    req.add_header('Authorization', app.config['APC_AUTH'])
+    req.get_method = lambda: 'POST'
+    result = urllib2.urlopen(req).read()
+
+    return result

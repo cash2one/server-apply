@@ -212,7 +212,19 @@ class ZeusUser(db1.Model):
     __tablename__ = 'user'
     __bind_key__ = 'zeus'
     id = Column(Integer, primary_key=True)
-    user_name = Column(String)
+    user_name = Column(String(45))
+    email = Column(String(45))
+    chinese_name = Column(String(45))
+    access = Column(Integer)
+    user = Column(Integer)
+    owner = Column(Integer)
+    role = Column(Integer)
 
-    def __init__(self, user_name):
+    def __init__(self, user_name, email, chinese_name, access, user, owner, role):
         self.user_name = user_name
+        self.email = email
+        self.chinese_name = chinese_name
+        self.access = access
+        self.user = user
+        self.owner = owner
+        self.role = role
