@@ -67,9 +67,9 @@
               {% endif %}
               <td><a href="#vnc" data-sid="{{ s.id }}"><img src="/static/img/vnc_on.png"/></a></td>
               <td>
-                <a href="#renew" data-toggle="modal" data-renew-url="{{ url_for('server.renew', server_id=s.id) }}"><i class="icon-time"></i></a>
-                <a href="{{ url_for('server.resubmit', server_id=s.id) }}" onclick="return confirm('你确定要重建该虚拟机吗?')"><i class="icon-retweet"></i></a>
-                <a href="{{ url_for('server.delete', server_id=s.id) }}" onclick="return confirm('你确定要删除该虚拟机吗?')"><i class="icon-remove"></i></a>
+                <a title="续期" href="#renew" data-toggle="modal" data-renew-url="{{ url_for('server.renew', server_id=s.id) }}"><i class="icon-time"></i></a>
+                <a title="重建" href="{{ url_for('server.resubmit', server_id=s.id) }}" onclick="return confirm('你确定要重建该虚拟机吗?')"><i class="icon-retweet"></i></a>
+                <a title="删除" href="{{ url_for('server.delete', server_id=s.id) }}" onclick="return confirm('你确定要删除该虚拟机吗?')"><i class="icon-remove"></i></a>
               </td>
             </tr>
             {% endif %}
