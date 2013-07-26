@@ -171,3 +171,24 @@ def startvnc(server, **kvargs):
     result = urllib2.urlopen(req).read()
 
     return result
+
+
+@mod.route('/<int:server_id>/resubmit')
+@login_required
+@check_load_server
+def resubmit(server, **kvargs):
+    if server.applier!=current_user.username and not current_user.if_admin:
+        abort(403)
+
+    params = "<COMPUTE><STATE>RESUBMIT</STATE></COMPUTE>"
+    req = urllib2.Request("%s/compute/%d" % (app.config['APC_URL'], server.vm_id), params)
+    req.add_header('Authorization', app.config['APC_AUTH'])
+    req.get_method = lambda: 'PUT'
+
+    try:
+        result = urllib2.urlopen(req).read()
+        flash(u'重建成功', 'success')
+    except:
+        flash(u'重建失败', 'error')
+
+    return redirect(request.headers.get('Referer'))

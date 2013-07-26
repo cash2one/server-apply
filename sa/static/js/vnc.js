@@ -62,7 +62,7 @@ function setupVNC(){
 
     dialog.dialog({
         autoOpen:false,
-        width:'auto',
+        width:750,
         modal:true,
         height:'auto',
         resizable:true,
